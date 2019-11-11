@@ -73,7 +73,16 @@ int main(int argc, char *argv[])
   }
   
   //print iteration info
-  double deltaT = 0.0;
+  double deltaT = 1.0e30;
+  for (int j = 1; j < ny; j++) {
+    for (int i = 1; i < nx; i++) {
+      double wavespeed = sqrt(g*H[j][i]);
+      double xspeed = (fabs(U[j][i])+wavespeed)/deltaX;
+      double yspeed = (fabs(V[j][i])+wavespeed)/deltaY;
+      double my_deltaT = sigma/(xspeed+yspeed);
+      if (my_deltaT < deltaT) deltaT = my_deltaT;
+    }
+  }
   printf("Iteration:%5.5d, Time:%f, Timestep:%f Total mass:%f\n", 0, time, deltaT, origTM);
 
   cpu_timer_start(&starttime);
