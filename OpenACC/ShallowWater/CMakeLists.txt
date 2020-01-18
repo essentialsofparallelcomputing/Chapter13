@@ -15,6 +15,12 @@ elseif (CMAKE_C_COMPILER_ID MATCHES "GNU")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstrict-aliasing")
 endif (CMAKE_C_COMPILER_ID MATCHES "PGI")
 
+if (CMAKE_CXX_COMPILER_ID MATCHES "PGI")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -alias=ansi")
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstrict-aliasing")
+endif (CMAKE_CXX_COMPILER_ID MATCHES "PGI")
+
 find_package(OpenACC)
 
 if (CMAKE_C_COMPILER_ID MATCHES "PGI")
@@ -27,6 +33,17 @@ endif (CMAKE_C_COMPILER_ID MATCHES "PGI")
 if (CMAKE_OPENACC_VERBOSE)
     set(OpenACC_C_FLAGS "${OpenACC_C_FLAGS} ${OpenACC_C_VERBOSE}")
 endif (CMAKE_OPENACC_VERBOSE)
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "PGI")
+    #set(OpenACCXX_CXX_VERBOSE "${OpenACCXX_CXX_VERBOSE} -Minfo=all,ccff")
+    set(OpenACCXX_CXX_VERBOSE "${OpenACCXX_CXX_VERBOSE} -Minfo=accel")
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+   set(OpenACCXX_CXX_VERBOSE "${OpenACCXX_CXX_VERBOSE} -fopt-info-optimized-omp")
+endif (CMAKE_CXX_COMPILER_ID MATCHES "PGI")
+
+if (CMAKE_OPENACCXX_VERBOSE)
+    set(OpenACCXX_CXX_FLAGS "${OpenACCXX_CXX_FLAGS} ${OpenACCXX_CXX_VERBOSE}")
+endif (CMAKE_OPENACCXX_VERBOSE)
 
 # Adds build target of ShallowWater with source code files
 add_executable(ShallowWater ShallowWater.c memory.c timer.c)

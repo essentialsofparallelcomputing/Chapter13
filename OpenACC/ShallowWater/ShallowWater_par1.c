@@ -14,8 +14,6 @@
 //define macro for squaring a number
 #define SQ(x) ((x)*(x))
 
-#define SWAP_PTR(xnew,xold,xtmp) (xtmp=xnew, xnew=xold, xold=xtmp)
-
 /* Memory allocation routines */
 double **malloc2D(int m, int n);
 
@@ -49,8 +47,6 @@ int main(int argc, char *argv[])
   double** restrict Hy = malloc2D(ny+1, nx);
   double** restrict Uy = malloc2D(ny+1, nx);
   double** restrict Vy = malloc2D(ny+1, nx);
-
-  double** restrict temp;
 
   /*initialize matrix*/
   
@@ -190,7 +186,15 @@ int main(int argc, char *argv[])
         }
       }
     
-      SWAP_PTR(H, Hnew, temp);
+      // Need to replace swap with copy
+#pragma acc parallel loop
+      for(int j=1;j<=ny;j++){
+        for(int i=1;i<=nx;i++){
+           H[j][i] = Hnew[j][i];
+           U[j][i] = Unew[j][i];
+           V[j][i] = Vnew[j][i];
+        }
+      }
 
     } // burst loop
       

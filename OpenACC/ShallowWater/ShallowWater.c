@@ -182,6 +182,8 @@ int main(int argc, char *argv[])
       }
     
       SWAP_PTR(H, Hnew, temp);
+      SWAP_PTR(U, Unew, temp);
+      SWAP_PTR(V, Vnew, temp);
 
     } // burst loop
       
