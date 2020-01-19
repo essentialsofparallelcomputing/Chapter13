@@ -8,7 +8,7 @@ rm -rf prof
 mkdir prof
 for prog in ShallowWater.c ShallowWater_par1.c ShallowWater_par2.c ShallowWater_par3.c ShallowWater_par4.c
 do
-   sed -e '1,$s/ntimes = 2000/ntimes = 20/' ${prog} > prof/${prog}
+   sed -e '1,$s/ntimes = 2000/ntimes = 4/' ${prog} > prof/${prog}
 done
 cd prof
 cp ../ShallowWater.h ../CMakeLists.txt ../memory.c ../timer.h ../timer.c .
