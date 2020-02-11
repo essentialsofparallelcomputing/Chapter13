@@ -1,0 +1,106 @@
+
+# Download VirtualBox and install
+
+# Download Ubuntu desktop install and save on local disk [ubuntu-18.04.2-desktop-amd64.iso]
+
+# Setup new machine
+
+# Click on New
+
+# Type in a name [chapter13]
+# Select Linux and Ubuntu 64-bit
+
+# Select the amount of memory [8192]
+
+# Create a virtual hard disk now
+# Select VDI VirtualBox Disk Image
+
+# Select Fixed Size Disk
+# Select 50 GB
+
+# Should see the new virtual machine added to the list
+
+# Start Ubuntu virtual machine (Green arrow, start)
+
+# Select iso file saved earlier [ubuntu-18.04.2-desktop-amd64.iso]
+
+# Switch to Scaled View. It is under View menu or use Right-Command C to switch back and forth
+# Main menu bar is hidden (access it by right command home (left command))
+
+# Select Install Ubuntu
+
+# Keyboard -- continue
+
+# Select minimal, download updates while installing and install third-party
+
+# Select Erase disk and install Ubuntu
+# Select Install Now
+
+# Select timezone
+
+# Your name [chapter13]
+# Your computer's name [chapter13-virtualbox]
+# Username [chapter13]
+# password [chapter13]
+# Select "Require my password to log in"
+
+# Select continue
+
+# Long time ....
+
+# Installation is complete, Restart computer
+
+# sign in
+
+# click through whats new
+
+# select dots at bottom left and terminal
+
+# sudo apt install git
+
+
+# git clone https://github.com/essentialsofparallelcomputing/Chapter12.git
+
+# ./README.virtualbox
+
+# ====
+sudo apt-get update
+
+sudo apt install build-essential dkms -y
+sudo apt-get install virtualbox-guest-additions-iso -y
+
+# if does not automatically run, go to file manager and clic on the CD. Choose Open Autorun Prompt
+
+# Make virtualbox window active and select devices from window menus at top of screen
+#     Shared Clipboard --> bidirectional
+#     Drag and Drop --> bidirectional
+#     Install guest additions (under devices pull-down
+#     Remove optical disk -- from desktop, right click and eject or from devices-->optical disk-->remove disk from virtual drive
+#     reboot and test copy paste
+# Copy on Mac is command-C and paste in Ubuntu is shift-ctrl-v
+
+sudo apt install nvidia-visual-profiler -y
+
+# To run nvvp -- nvvp
+
+wget https://github.com/GPUOpen-Tools/CodeXL/releases/download/v2.6/codexl_2.6-302_amd64.deb
+sudo dpkg -i codexl_2.6-302_amd64.deb
+sudo apt-get -f install -y
+
+# AMD profiler should be in /opt/CodeXL_2.6-302
+# Add to path in .bash_profile with 
+# export PATH=/opt/CodeXL_2.6-302:${PATH}
+# run with ./CodeXL or CodeXL once it is in your path
+
+
+
+# ====================
+
+# Manually select pull-down menu Devices -> Install Guest additions
+# May need to shutdown and restart guest VM
+
+#sudo apt install openjdk-8-jdk
+# sudo update-alternatives --config java
+# and pick the java-8
+
+# If Software updater prompts, install updated software --> wait ....
