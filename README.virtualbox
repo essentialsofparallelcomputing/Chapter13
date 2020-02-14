@@ -61,7 +61,7 @@
 
 # git clone https://github.com/essentialsofparallelcomputing/Chapter12.git
 
-# ./README.virtualbox
+# Chapter13/README.virtualbox
 
 # ====
 sudo apt-get update
