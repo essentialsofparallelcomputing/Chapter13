@@ -3,70 +3,63 @@ project (ShallowWater)
 
 set (CMAKE_C_STANDARD 99)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O3")
 
 if (NOT CMAKE_OPENACC_VERBOSE)
     set(CMAKE_OPENACC_VERBOSE true)
 endif (NOT CMAKE_OPENACC_VERBOSE)
 
-if (CMAKE_C_COMPILER_ID MATCHES "PGI")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -alias=ansi")
-elseif (CMAKE_C_COMPILER_ID MATCHES "GNU")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstrict-aliasing")
-endif (CMAKE_C_COMPILER_ID MATCHES "PGI")
-
-if (CMAKE_CXX_COMPILER_ID MATCHES "PGI")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -alias=ansi")
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstrict-aliasing")
-endif (CMAKE_CXX_COMPILER_ID MATCHES "PGI")
+find_package(Vector)
+if (CMAKE_VECTOR_VERBOSE)
+    set(VECTOR_C_FLAGS "${VECTOR_C_FLAGS} ${VECTOR_C_VERBOSE}")
+    set(VECTOR_CXX_FLAGS "${VECTOR_CXX_FLAGS} ${VECTOR_CXX_VERBOSE}")
+endif (CMAKE_VECTOR_VERBOSE)
+if (CMAKE_VECTOR_NOVEC)
+    set(VECTOR_C_FLAGS "${VECTOR_NOVEC_C_FLAGS}")
+    set(VECTOR_CXX_FLAGS "${VECTOR_NOVEC_CXX_FLAGS}")
+endif (CMAKE_VECTOR_NOVEC)
 
 find_package(OpenACC)
-
-if (CMAKE_C_COMPILER_ID MATCHES "PGI")
-    #set(OpenACC_C_VERBOSE "${OpenACC_C_VERBOSE} -Minfo=all,ccff")
-    set(OpenACC_C_VERBOSE "${OpenACC_C_VERBOSE} -Minfo=accel")
-elseif (CMAKE_C_COMPILER_ID MATCHES "GNU")
-   set(OpenACC_C_VERBOSE "${OpenACC_C_VERBOSE} -fopt-info-optimized-omp")
-endif (CMAKE_C_COMPILER_ID MATCHES "PGI")
 
 if (CMAKE_OPENACC_VERBOSE)
     set(OpenACC_C_FLAGS "${OpenACC_C_FLAGS} ${OpenACC_C_VERBOSE}")
 endif (CMAKE_OPENACC_VERBOSE)
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "PGI")
-    #set(OpenACCXX_CXX_VERBOSE "${OpenACCXX_CXX_VERBOSE} -Minfo=all,ccff")
-    set(OpenACCXX_CXX_VERBOSE "${OpenACCXX_CXX_VERBOSE} -Minfo=accel")
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-   set(OpenACCXX_CXX_VERBOSE "${OpenACCXX_CXX_VERBOSE} -fopt-info-optimized-omp")
-endif (CMAKE_CXX_COMPILER_ID MATCHES "PGI")
-
 if (CMAKE_OPENACCXX_VERBOSE)
     set(OpenACCXX_CXX_FLAGS "${OpenACCXX_CXX_FLAGS} ${OpenACCXX_CXX_VERBOSE}")
 endif (CMAKE_OPENACCXX_VERBOSE)
 
+add_subdirectory(graphics)
+
 # Adds build target of ShallowWater with source code files
 add_executable(ShallowWater ShallowWater.c memory.c timer.c)
+target_link_libraries(ShallowWater -lm)
 
 # Adds build target of ShallowWater_par1 with source code files
 add_executable(ShallowWater_par1 ShallowWater_par1.c memory.c timer.c)
-set_source_files_properties(ShallowWater_par1.c PROPERTIES COMPILE_FLAGS "${OpenACC_C_FLAGS}")
+set_source_files_properties(ShallowWater_par1.c PROPERTIES COMPILE_FLAGS "${OpenACC_C_FLAGS} ${VECTOR_C_FLAGS}")
 set_target_properties(ShallowWater_par1 PROPERTIES LINK_FLAGS "${OpenACC_C_FLAGS}")
+target_link_libraries(ShallowWater_par1 -lm)
 
 # Adds build target of ShallowWater_par2 with source code files
 add_executable(ShallowWater_par2 ShallowWater_par2.c memory.c timer.c)
-set_source_files_properties(ShallowWater_par2.c PROPERTIES COMPILE_FLAGS "${OpenACC_C_FLAGS}")
+set_source_files_properties(ShallowWater_par2.c PROPERTIES COMPILE_FLAGS "${OpenACC_C_FLAGS} ${VECTOR_C_FLAGS}")
 set_target_properties(ShallowWater_par2 PROPERTIES LINK_FLAGS "${OpenACC_C_FLAGS}")
+target_link_libraries(ShallowWater_par2 -lm)
 
 # Adds build target of ShallowWater_par3 with source code files
 add_executable(ShallowWater_par3 ShallowWater_par3.c memory.c timer.c)
-set_source_files_properties(ShallowWater_par3.c PROPERTIES COMPILE_FLAGS "${OpenACC_C_FLAGS}")
+set_source_files_properties(ShallowWater_par3.c PROPERTIES COMPILE_FLAGS "${OpenACC_C_FLAGS} ${VECTOR_C_FLAGS}")
 set_target_properties(ShallowWater_par3 PROPERTIES LINK_FLAGS "${OpenACC_C_FLAGS}")
+target_link_libraries(ShallowWater_par3 -lm)
 
 # Adds build target of ShallowWater_par4 with source code files
 add_executable(ShallowWater_par4 ShallowWater_par4.c memory.c timer.c)
-set_source_files_properties(ShallowWater_par4.c PROPERTIES COMPILE_FLAGS "${OpenACC_C_FLAGS}")
+set_source_files_properties(ShallowWater_par4.c PROPERTIES COMPILE_FLAGS "${OpenACC_C_FLAGS} ${VECTOR_C_FLAGS}")
 set_target_properties(ShallowWater_par4 PROPERTIES LINK_FLAGS "${OpenACC_C_FLAGS}")
+target_link_libraries(ShallowWater_par4 -lm)
 
 # Cleanup
 add_custom_target(distclean COMMAND rm -rf CMakeCache.txt CMakeFiles
