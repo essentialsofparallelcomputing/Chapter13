@@ -279,7 +279,7 @@ void free_display(void){
 #endif
 }
 void DisplayState(void) {
-   double scaleMax = 800.0, scaleMin = 0.0; //1200
+   double scaleMax = 60.0, scaleMin = 0.0; //1200
    int i;
 #ifdef HAVE_OPENGL
    int color;
@@ -378,10 +378,10 @@ void DisplayState(void) {
 
     DrawString (text_position(display_xmax,
                               display_xmin,
-                              0.30),
+                              0.25),
                 text_position(display_ymax,
                               display_ymin,
-                              0.05),
+                              0.98),
                 0, iteration_text);
 
     // Display the actual simulation iteration
@@ -393,17 +393,17 @@ void DisplayState(void) {
     sprintf(sim_cycle_text, "sim cycle: %i", sim_cycle);
     DrawString (text_position(display_xmax,
                               display_xmin,
-                              0.40),
+                              0.50),
                 text_position(display_ymax,
                               display_ymin,
-                              0.08),
+                              0.98),
                 0, sim_time_text);
     DrawString (text_position(display_xmax,
                               display_xmin,
-                              0.30),
+                              0.75),
                 text_position(display_ymax,
                               display_ymin,
-                              0.11),
+                              0.98),
                 0, sim_cycle_text);
 
 #endif

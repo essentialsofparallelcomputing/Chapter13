@@ -81,8 +81,8 @@ int main(int argc, char *argv[])
   double** restrict dy = malloc2D(ny+2, nx+2);
   double** restrict x = malloc2D(ny+2, nx+2);
   double** restrict y = malloc2D(ny+2, nx+2);
-  for(int j=0;j<ny;j++){
-    for(int i=0;i<nx;i++){
+  for(int j=0;j<=ny+1;j++){
+    for(int i=0;i<=nx+1;i++){
        dx[j][i] = 1.0;
        dy[j][i] = 1.0;
        x[j][i] = 0.0 + (double)i * 1.0;
@@ -91,10 +91,10 @@ int main(int argc, char *argv[])
   }
   float xwinmin=0.0-2.0;
   float xwinmax=(float)nx+2.0;
-  float ywinmin=0.0-2.0;
+  float ywinmin=0.0-12.0;
   float ywinmax=(float)ny+2.0;
 
-  set_display_mysize(nx*ny);
+  set_display_mysize((nx+2)*(ny+2));
   set_display_cell_coordinates_double((double *)x, (double *)dx, (double *)y, (double *)dy);
   set_display_cell_data_double((double *)H);
 
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
   set_display_outline(1);
   init_display(&argc, argv, "Shallow Water");
   draw_scene();
-  //sleep(10);
+  //sleep(1);
 
   set_graphics_mysize(nx*ny);
   set_graphics_window(xwinmin,xwinmax,ywinmin,ywinmax);
@@ -250,15 +250,14 @@ int main(int argc, char *argv[])
     n+=nburst;
 
     //print iteration info
-    if (n%100 == 0) {
-       printf("Iteration:%5.5d, Time:%f, Timestep:%f Total mass:%f\n", n, time, deltaT, TotalMass);
+    printf("Iteration:%5.5d, Time:%f, Timestep:%f Total mass:%f\n", n, time, deltaT, TotalMass);
 
 #ifdef HAVE_GRAPHICS
-       set_display_cell_data_double((double *)H);
-       draw_scene();
-       //sleep(10);
+    set_display_cell_data_double((double *)H);
+    provide_sim_progress(time, n);
+    draw_scene();
+    //sleep(10);
 #endif
-    }
 
   }  // End of iteration loop
   
@@ -281,6 +280,12 @@ int main(int argc, char *argv[])
   free(Hy);
   free(Uy);
   free(Vy);
+#ifdef HAVE_GRAPHICS
+  free(x);
+  free(y);
+  free(dx);
+  free(dy);
+#endif
   
   exit(0);
 }
