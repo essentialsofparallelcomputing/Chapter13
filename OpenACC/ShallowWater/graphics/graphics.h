@@ -84,13 +84,10 @@ void terminate_graphics_output(void);
 void set_graphics_viewmode(int graphics_view_mode_in);
 void set_graphics_mysize(int graphics_mysize_in);
 void set_graphics_outline(int graphics_outline_in);
-void set_graphics_cell_data_double(double *data_in);
-void set_graphics_cell_data_float(float *data_in);
+void set_graphics_cell_data(double *data_in);
 void set_graphics_cell_proc(int *graphics_proc_in);
-void set_graphics_cell_coordinates_double(double *x_in, double *dx_in,
-                                          double *y_in, double *dy_in);
-void set_graphics_cell_coordinates_float(float *x_in, float *dx_in,
-                                         float *y_in, float *dy_in);
+void set_graphics_cell_coordinates(double *x_in, double *dx_in,
+                                   double *y_in, double *dy_in);
 void write_graphics_info(int graph_num, int ncycle, double simTime,
                          int rollback_img, int rollback_num);
 

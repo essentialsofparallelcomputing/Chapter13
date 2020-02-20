@@ -62,11 +62,11 @@
 
 #ifdef HAVE_OPENGL
 #ifdef __APPLE_CC__
-#include <GLUT/glut.h>
+#include <GL/freeglut.h>
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
 #else
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #endif
@@ -75,33 +75,6 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif
-
-#define OMPI_SKIP_MPICXX 1
-
-#ifdef HAVE_MPI
-#include <mpi.h>
-#endif
-
-#ifdef HAVE_MPE
-#ifndef HAVE_MPI
-#define MPE_NOMPI
-#define CLOG_NOMPI
-#endif
-#define MPE_INTERNAL
-#define MPE_GRAPHICS
-#include "mpe.h"
-#define MPE_DRAG_FIXED_RECT 8
-#include <X11/Xlib.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-//keyboard input files
-#include <termios.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <string.h>
-#include <math.h>
 #endif
 
 void init_display(int *argc, char **argv, const char* string);

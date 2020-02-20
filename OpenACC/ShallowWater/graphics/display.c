@@ -63,6 +63,10 @@
 #include "config.h"
 #endif
 
+#ifndef DEBUG
+#define DEBUG 0
+#endif
+
 #if defined(MINIMUM_PRECISION)
    typedef float real_t;
 #elif defined(MIXED_PRECISION)
@@ -75,14 +79,10 @@
 #ifdef HAVE_OPENGL
 #define NCOLORS 5000
 #else
-#ifdef HAVE_MPE
-#define NCOLORS 256
-#else
 #define NCOLORS 5000
 #endif
-#endif
 
-#define WINSIZE 1200 //800 // 1200
+#define WINSIZE 800 // 1200
 int scale;
 int DrawString(float x, float y, float z, char* string);
 void InitGL(int width, int height);
@@ -108,24 +108,9 @@ static int current_frame = 0;
 static double sim_time;
 static int sim_cycle;
 
-#ifndef HAVE_MPI
-#if defined(HAVE_MPE)
-static int MPI_COMM_WORLD=0;
-#endif
-#endif
-
 #ifdef HAVE_OPENGL
 static struct ColorTable Rainbow[NCOLORS];
 static int window;
-#endif
-#ifdef HAVE_MPE
-static MPE_Color *color_array;
-static int ncolors=256;
-static MPE_XGraph window;
-static double xconv = 0.0;
-static double yconv = 0.0;
-static XFontStruct *font_info;
-void (*idlefunction)(void);
 #endif
 
 #ifdef HAVE_OPENGL
@@ -136,20 +121,13 @@ static int real_t, xstart, ystart, xend, yend;
 enum mode_choice {EYE, MOVE, DRAW};
 static int mode = MOVE;
 
-#if defined(HAVE_MPE)
-static int height;
-#endif
 static int width;
 static float display_xmin=0.0, display_xmax=0.0, display_ymin=0.0, display_ymax=0.0;
 
 #ifdef HAVE_OPENGL
 static GLfloat xrot = 0.0, yrot = 0.0, xloc = 0.0, zloc = 0.0;
 #else
-#ifdef HAVE_MPE
 static double xrot = 0.0, yrot = 0.0, xloc = 0.0, zloc = 0.0;
-#else
-static double xrot = 0.0, yrot = 0.0, xloc = 0.0, zloc = 0.0;
-#endif
 #endif
 
 static int display_outline;
@@ -162,18 +140,11 @@ static int spatial_type = SPATIAL_FLOAT;
 static double *x_double=NULL, *y_double=NULL, *dx_double=NULL, *dy_double=NULL;
 static float *x_float=NULL, *y_float=NULL, *dx_float=NULL, *dy_float=NULL;
 
-//static double *xpart_double=NULL, *ypart_double=NULL;
-static float *xpart_float=NULL, *ypart_float=NULL;
-static int npart;
-
 enum plot_data_type {DATA_DOUBLE, DATA_FLOAT};
 static int data_type = DATA_FLOAT;
 static double *data_double=NULL;
 static float *data_float=NULL;
 static int *display_proc=NULL;
-#if defined(HAVE_MPI) || defined(HAVE_OPENGL)
-static int rank = 0;
-#endif
 
 int DrawString(float x, float y, float z, char* string) {
 #ifdef HAVE_OPENGL
@@ -185,12 +156,7 @@ int DrawString(float x, float y, float z, char* string) {
       //glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
    }
 #endif
-#ifdef HAVE_MPE
-   int xloc = (int)((x-display_xmin)*xconv);
-   int yloc = (int)((display_ymax-y)*yconv);
-   //MPE_Draw_string(window, xloc, yloc, MPE_BLACK, string);
-#endif
-#if ! defined(HAVE_OPENGL) && ! defined(HAVE_MPE)
+#ifdef HAVE_OPENGL
    // Just to get rid of compiler warnings
    if (1 == 2) printf("DEBUG -- x %f y %f z %f string %s\n",x,y,z,string);
 #endif
@@ -222,83 +188,19 @@ void InitGL(int width, int height) {
 #endif
 void init_display(int *argc, char **argv, const char *title){
 
-#if ! defined(HAVE_OPENGL) && ! defined(HAVE_MPE)
+#ifdef HAVE_OPENGL
    // Just to get rid of compiler warnings
    if (1 == 2) printf("DEBUG -- argc %d argv %s title %s\n",*argc,argv[0],title);
 #endif
 
-#ifdef HAVE_MPI
-   int mpi_init_flag=0;
-   MPI_Initialized(&mpi_init_flag);
-   if (mpi_init_flag){
-      MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-   } else {
-      MPI_Init(argc, &argv);
-   }
-#endif
-
    width = (WINSIZE / (display_ymax - display_ymin)) * (display_xmax - display_xmin);
 #ifdef HAVE_OPENGL
-   // Needs some more work for Fortran interface, so bypassing argc, argv
-   //glutInit(argc, argv);
-   int myargc = 1;
-   char *myargv[1] = {(char*)"Something"};
-   glutInit(&myargc,myargv);
+   glutInit(argc, argv);
    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
-   if (rank == 0) {
-      glutInitWindowSize(width, WINSIZE);
-      glutInitWindowPosition(20, 20);
-   } else {
-      glutInitWindowSize(1,1);
-      glutInitWindowPosition(5, 5);
-   }
+   glutInitWindowSize(width, WINSIZE);
+   glutInitWindowPosition(100, 100);
 
    window = glutCreateWindow(title);
-#endif
-
-#ifdef HAVE_MPE
-   char fontname[30];
-   char *displayname=NULL;
-
-   /* Open the graphics display */
-
-   if (*argc > 2 && strcmp( argv[1], "-display" ) == 0) {
-      displayname = (char *)malloc( strlen( argv[2] ) + 1 );
-      strcpy(displayname, argv[2]);
-   }
-
-   if (displayname == NULL){
-      displayname = getenv("DISPLAY");
-      if (displayname == NULL){
-         displayname = (char *)malloc((size_t)28);
-         displayname = ":0";
-      }
-   }
-
-   if (MPE_Open_graphics( &window, MPI_COMM_WORLD, displayname,
-                         -1, -1, WINSIZE, WINSIZE, 0) != MPE_SUCCESS){
-      printf("Problem opening graphics window\n");
-      exit(-1);
-   }
-
-   xconv = (double)WINSIZE/ (display_xmax-display_xmin);
-   yconv = (double)WINSIZE/(display_ymax-display_ymin);
-
-   if (rank == 0){
-      XSelectInput( window->xwin->disp, window->xwin->win, MPE_XEVT_IDLE_MASK |
-                  ButtonPressMask   |
-                  ButtonReleaseMask |
-                  Button1MotionMask |
-                  KeyPressMask      |
-                  ExposureMask      |
-                  StructureNotifyMask);
-   }
-
-   MPE_Update(window);
-
-   // if we want to change fonts, we can load a new one with the following
-   strcpy(fontname,"fixed");
-   font_info = XLoadQueryFont( window->xwin->disp, fontname );
 #endif
 
    Scale();
@@ -317,11 +219,8 @@ void set_idle_function(void (*function)(void)){
 #ifdef HAVE_OPENGL
    glutIdleFunc(function);
 #endif
-#ifdef HAVE_MPE
-   idlefunction = function;
-#endif
 
-#if ! defined(HAVE_OPENGL) && ! defined(HAVE_MPE)
+#ifdef HAVE_OPENGL
    // Just to get rid of compiler warnings
    if (1 == 2) printf("DEBUG -- function %p\n",function);
 #endif
@@ -329,10 +228,7 @@ void set_idle_function(void (*function)(void)){
 
 void start_main_loop(void){
 #ifdef HAVE_OPENGL
-   glutMainLoop();
-#endif
-#ifdef HAVE_MPE
-   mpe_main_loop();
+   glutMainLoopEvent();
 #endif
 }
    
@@ -377,14 +273,6 @@ void set_display_cell_coordinates_float(float *x_in, float *dx_in, float *y_in, 
    y_float = y_in;
    dy_float = dy_in;
 }
-
-void set_display_particle_coordinates_float(float *xpart_in,float *ypart_in, int npart_in){
-   spatial_type = SPATIAL_FLOAT;
-   xpart_float = xpart_in;
-   ypart_float = ypart_in;
-   npart = npart_in;
-}
-
 void free_display(void){
 #ifdef HAVE_OPENGL
    glutDestroyWindow(window);
@@ -393,7 +281,7 @@ void free_display(void){
 void DisplayState(void) {
    double scaleMax = 800.0, scaleMin = 0.0; //1200
    int i;
-#if defined(HAVE_OPENGL) || defined(HAVE_MPE)
+#ifdef HAVE_OPENGL
    int color;
 #endif
    //vector<real_t> &H = state->H;
@@ -414,7 +302,7 @@ void DisplayState(void) {
       }
    }
 
-#if defined(HAVE_OPENGL) || defined(HAVE_MPE)
+#ifdef HAVE_OPENGL
    double step = NCOLORS/(scaleMax - scaleMin);
 #endif
   
@@ -424,17 +312,14 @@ void DisplayState(void) {
 #endif
   
 #ifdef HAVE_OPENGL
-
-   //printf("Number of particles %i",npart);
-
    for(i = 0; i < display_mysize; i++) {
       /*Draw filled cells with color set by state value*/
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       glBegin(GL_QUADS);
-      
 
       if (data_type == DATA_DOUBLE){
          color = (int)(data_double[i]-scaleMin)*step;
+         if (DEBUG) printf("DEBUG color[%d] %d %lf %lf\n",i,color,data_double[i],step);
       } else {
          color = (int)(data_float[i]-scaleMin)*step;
       }
@@ -446,15 +331,20 @@ void DisplayState(void) {
       glColor3f(Rainbow[color].Red, Rainbow[color].Green, Rainbow[color].Blue);
    
       if (spatial_type == SPATIAL_DOUBLE){
-            glVertex2f(x_double[i]-0.5*dx_double[i], y_double[i]-0.5*dy_double[i]);
-            glVertex2f(x_double[i]+0.5*dx_double[i], y_double[i]-0.5*dy_double[i]);
-            glVertex2f(x_double[i]+0.5*dx_double[i], y_double[i]+0.5*dy_double[i]);
-            glVertex2f(x_double[i]-0.5*dx_double[i], y_double[i]+0.5*dy_double[i]);
+         if (DEBUG) printf("DEBUG draw vertex[%d] %lf %lf\n",i,x_double[i]-0.5*dx_double[i],y_double[i]-0.5*dy_double[i]);
+         glVertex2f(x_double[i]-0.5*dx_double[i], y_double[i]-0.5*dy_double[i]);
+         if (DEBUG) printf("DEBUG draw vertex[%d] %lf %lf\n",i,x_double[i]+0.5*dx_double[i],y_double[i]-0.5*dy_double[i]);
+         glVertex2f(x_double[i]+0.5*dx_double[i], y_double[i]-0.5*dy_double[i]);
+         if (DEBUG) printf("DEBUG draw vertex[%d] %lf %lf\n",i,x_double[i]+0.5*dx_double[i],y_double[i]+0.5*dy_double[i]);
+         glVertex2f(x_double[i]+0.5*dx_double[i], y_double[i]+0.5*dy_double[i]);
+         if (DEBUG) printf("DEBUG draw vertex[%d] %lf %lf\n",i,x_double[i]-0.5*dx_double[i],y_double[i]+0.5*dy_double[i]);
+         glVertex2f(x_double[i]-0.5*dx_double[i], y_double[i]+0.5*dy_double[i]);
+         if (DEBUG) printf("\n");
       } else {
-            glVertex2f(x_float[i]-0.5*dx_float[i], y_float[i]-0.5*dy_float[i]);
-            glVertex2f(x_float[i]+0.5*dx_float[i], y_float[i]-0.5*dy_float[i]);
-            glVertex2f(x_float[i]+0.5*dx_float[i], y_float[i]+0.5*dy_float[i]);
-            glVertex2f(x_float[i]-0.5*dx_float[i], y_float[i]+0.5*dy_float[i]);
+         glVertex2f(x_float[i]-0.5*dx_float[i], y_float[i]-0.5*dy_float[i]);
+         glVertex2f(x_float[i]+0.5*dx_float[i], y_float[i]-0.5*dy_float[i]);
+         glVertex2f(x_float[i]+0.5*dx_float[i], y_float[i]+0.5*dy_float[i]);
+         glVertex2f(x_float[i]-0.5*dx_float[i], y_float[i]+0.5*dy_float[i]);
       }
       glEnd();
    
@@ -516,101 +406,6 @@ void DisplayState(void) {
                               0.11),
                 0, sim_cycle_text);
 
-    //Draw particles as X points
-    for (int i = 0; i < npart; i++) {
-          //if(i==0) printf("Drawing particle, %d\n",npart);
-
-          glColor3f(0.8f, 0.8f, 0.8f);
-          glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-          glBegin(GL_LINES);
-          glVertex2f(xpart_float[i]-0.1*dx_float[0],ypart_float[i]-0.1*dy_float[0]);
-          glVertex2f(xpart_float[i]+0.1*dx_float[0],ypart_float[i]+0.1*dy_float[0]);
-          //printf("xpar %f, %f, %f, %f \n",xpart_float[i],ypart_float[i],dx_float[i],dy_float[i]);
-        
-          glEnd();
-          glBegin(GL_LINES);
-          glVertex2f(xpart_float[i]+0.1*dx_float[0],ypart_float[i]-0.1*dy_float[0]);
-          glVertex2f(xpart_float[i]-0.1*dx_float[0],ypart_float[i]+0.1*dy_float[0]);
-          glEnd();
-
-   }
-
-#endif
-#ifdef HAVE_MPE
-   int xloc, xwid, yloc, ywid;
-   int xloc1, xloc2, yloc1, yloc2;
-   if (spatial_type == SPATIAL_DOUBLE){
-      for(i = 0; i < display_mysize; i++) {
-         if (data_type == DATA_DOUBLE){
-            color = (int)(data_double[i]-scaleMin)*step;
-         } else {
-            color = (int)(data_float[i]-scaleMin)*step;
-         }
-         color = NCOLORS-color;
-         if (color < 0) {
-            color=0;
-         }
-         if (color >= NCOLORS) color = NCOLORS-1;
-
-         //printf("DEBUG mesh -- xconv is %lf xmin %lf x[%d]=%lf\n",xconv,display_xmin,i,x[i]);
-         //printf("DEBUG mesh -- yconv is %lf ymin %lf ymax %lf y[%d]=%lf\n",yconv,display_ymin,display_ymax,i,y[i]);
-         xloc = (int)((x_double[i]-display_xmin)*xconv);
-         xwid = (int)((x_double[i]+dx_double[i]-display_xmin)*xconv-xloc);
-         yloc = (int)((display_ymax-(y_double[i]+dy_double[i]))*yconv);
-         ywid = (int)((display_ymax-y_double[i])*yconv);
-         ywid -= yloc;
-         //printf("xloc is %d xwid %d yloc is %d ywid %d color is  %d step is %d\n",xloc,xwid,yloc,ywid,color,step);
-         MPE_Fill_rectangle(window, xloc, yloc, xwid, ywid, color_array[color]);
-
-         if (display_outline) {
-            xloc1 = (int)((x_double[i]-display_xmin)*xconv);
-            xloc2 = (int)((x_double[i]+dx_double[i]-display_xmin)*xconv);
-            yloc1 = (int)((display_ymax-y_double[i])*yconv);
-            yloc2 = (int)((display_ymax-(y_double[i]+dy_double[i]))*yconv);
-            //printf("xloc1 is %d xloc2 %d yloc1 is %d yloc2 %d\n",xloc1,xloc2,yloc1,yloc2);
-            MPE_Draw_line(window, xloc1, yloc2, xloc2, yloc2, MPE_BLACK);
-            MPE_Draw_line(window, xloc1, yloc1, xloc2, yloc1, MPE_BLACK);
-            MPE_Draw_line(window, xloc1, yloc1, xloc1, yloc2, MPE_BLACK);
-            MPE_Draw_line(window, xloc2, yloc1, xloc2, yloc2, MPE_BLACK);
-         }
-      }
-   } else {
-      for(i = 0; i < display_mysize; i++) {
-         if (data_type == DATA_DOUBLE){
-            color = (int)(data_double[i]-scaleMin)*step;
-         } else {
-            color = (int)(data_float[i]-scaleMin)*step;
-         }
-         color = NCOLORS-color;
-         if (color < 0) {
-            color=0;
-         }
-         if (color >= NCOLORS) color = NCOLORS-1;
-
-         //printf("DEBUG mesh -- xconv is %lf xmin %lf x[%d]=%lf\n",xconv,display_xmin,i,x[i]);
-         //printf("DEBUG mesh -- yconv is %lf ymin %lf ymax %lf y[%d]=%lf\n",yconv,display_ymin,display_ymax,i,y[i]);
-         xloc = (int)((x_float[i]-display_xmin)*xconv);
-         xwid = (int)((x_float[i]+dx_float[i]-display_xmin)*xconv-xloc);
-         yloc = (int)((display_ymax-(y_float[i]+dy_float[i]))*yconv);
-         ywid = (int)((display_ymax-y_float[i])*yconv);
-         ywid -= yloc;
-         //printf("xloc is %d xwid %d yloc is %d ywid %d color is  %d step is %d\n",xloc,xwid,yloc,ywid,color,step);
-         MPE_Fill_rectangle(window, xloc, yloc, xwid, ywid, color_array[color]);
-
-         if (display_outline) {
-            xloc1 = (int)((x_float[i]-display_xmin)*xconv);
-            xloc2 = (int)((x_float[i]+dx_float[i]-display_xmin)*xconv);
-            yloc1 = (int)((display_ymax-y_float[i])*yconv);
-            yloc2 = (int)((display_ymax-(y_float[i]+dy_float[i]))*yconv);
-            //printf("xloc1 is %d xloc2 %d yloc1 is %d yloc2 %d\n",xloc1,xloc2,yloc1,yloc2);
-            MPE_Draw_line(window, xloc1, yloc2, xloc2, yloc2, MPE_BLACK);
-            MPE_Draw_line(window, xloc1, yloc1, xloc2, yloc1, MPE_BLACK);
-            MPE_Draw_line(window, xloc1, yloc1, xloc1, yloc2, MPE_BLACK);
-            MPE_Draw_line(window, xloc2, yloc1, xloc2, yloc2, MPE_BLACK);
-         }
-      }
-   }
-   MPE_Update(window);
 #endif
 
   
@@ -632,7 +427,7 @@ void DisplayState(void) {
 
 void DrawSquares(void) {
    if (display_proc == NULL) return;
-#if defined(HAVE_OPENGL) || defined(HAVE_MPE)
+#ifdef HAVE_OPENGL
    int i, color;
    int step = NCOLORS/(display_proc[display_mysize-1]+1);
 #endif
@@ -680,59 +475,6 @@ void DrawSquares(void) {
       glEnd();
    }
 #endif
-#ifdef HAVE_MPE
-   int xloc, xwid, yloc, ywid;
-   int xloc1, xloc2, yloc1, yloc2;
-   if (spatial_type == SPATIAL_DOUBLE){
-      for(i = 0; i < display_mysize; i++) {
-         //printf("DEBUG mesh -- xconv is %lf xmin %lf x[%d]=%lf\n",xconv,display_xmin,i,x[i]);
-         xloc = (int)((x_double[i]-display_xmin)*xconv);
-         xwid = (int)((x_double[i]+dx_double[i]-display_xmin)*xconv-xloc);
-         yloc = (int)((display_ymax-(y_double[i]+dy_double[i]))*yconv);
-         ywid = (int)((display_ymax-y_double[i])*yconv);
-         ywid -= yloc;
-         color = display_proc[i]*step;
-         //printf("xloc is %d xwid %d yloc is %d ywid %d color is  %d step is %d\n",xloc,xwid,yloc,ywid,color,step);
-         MPE_Fill_rectangle(window, xloc, yloc, xwid, ywid, color_array[color]);
-
-         xloc1 = (int)((x_double[i]-display_xmin)*xconv);
-         xloc2 = (int)((x_double[i]+dx_double[i]-display_xmin)*xconv);
-         yloc1 = (int)((display_ymax-y_double[i])*yconv);
-         yloc2 = (int)((display_ymax-(y_double[i]+dy_double[i]))*yconv);
-         //printf("xloc1 is %d xloc2 %d yloc1 is %d yloc2 %d\n",xloc1,xloc2,yloc1,yloc2);
-         MPE_Draw_line(window, xloc1, yloc2, xloc2, yloc2, MPE_BLACK);
-         MPE_Draw_line(window, xloc1, yloc1, xloc2, yloc1, MPE_BLACK);
-         MPE_Draw_line(window, xloc1, yloc1, xloc1, yloc2, MPE_BLACK);
-         MPE_Draw_line(window, xloc2, yloc1, xloc2, yloc2, MPE_BLACK);
-
-         //MPE_Fill_rectangle(window, xloc, yloc, xwid, ywid, MPE_RED);
-      }
-   } else {
-      for(i = 0; i < display_mysize; i++) {
-         //printf("DEBUG mesh -- xconv is %lf xmin %lf x[%d]=%lf\n",xconv,display_xmin,i,x[i]);
-         xloc = (int)((x_float[i]-display_xmin)*xconv);
-         xwid = (int)((x_float[i]+dx_float[i]-display_xmin)*xconv-xloc);
-         yloc = (int)((display_ymax-(y_float[i]+dy_float[i]))*yconv);
-         ywid = (int)((display_ymax-y_float[i])*yconv);
-         ywid -= yloc;
-         color = display_proc[i]*step;
-         //printf("xloc is %d xwid %d yloc is %d ywid %d color is  %d step is %d\n",xloc,xwid,yloc,ywid,color,step);
-         MPE_Fill_rectangle(window, xloc, yloc, xwid, ywid, color_array[color]);
-
-         xloc1 = (int)((x_float[i]-display_xmin)*xconv);
-         xloc2 = (int)((x_float[i]+dx_float[i]-display_xmin)*xconv);
-         yloc1 = (int)((display_ymax-y_float[i])*yconv);
-         yloc2 = (int)((display_ymax-(y_float[i]+dy_float[i]))*yconv);
-         //printf("xloc1 is %d xloc2 %d yloc1 is %d yloc2 %d\n",xloc1,xloc2,yloc1,yloc2);
-         MPE_Draw_line(window, xloc1, yloc2, xloc2, yloc2, MPE_BLACK);
-         MPE_Draw_line(window, xloc1, yloc1, xloc2, yloc1, MPE_BLACK);
-         MPE_Draw_line(window, xloc1, yloc1, xloc1, yloc2, MPE_BLACK);
-         MPE_Draw_line(window, xloc2, yloc1, xloc2, yloc2, MPE_BLACK);
-
-         //MPE_Fill_rectangle(window, xloc, yloc, xwid, ywid, MPE_RED);
-      }
-   }
-#endif
 
 #ifdef HAVE_OPENGL
    /* Draw circle for initial conditions */
@@ -760,34 +502,6 @@ void DrawSquares(void) {
          }
       }
    glEnd();
-#endif
-#ifdef HAVE_MPE
-   int xloc_old, yloc_old;
-   if (spatial_type == SPATIAL_DOUBLE){
-      xloc_old = (int)((x_double[0]+0.5*dx_double[0]-display_xmin)*xconv);
-      yloc_old = (int)((y_double[0]+0.5*dy_double[0]-display_ymin)*yconv);
-      for(i = 1; i < display_mysize; i++) {
-         xloc = (int)((x_double[i]+0.5*dx_double[i]-display_xmin)*xconv);
-         yloc = (int)((y_double[i]+0.5*dy_double[i]-display_ymin)*yconv);
-         MPE_Draw_line(window,xloc_old,yloc_old,xloc,yloc,MPE_BLACK);
-         xloc_old = xloc;
-         yloc_old = yloc;
-      }
-   } else {
-      xloc_old = (int)((x_float[0]+0.5*dx_float[0]-display_xmin)*xconv);
-      yloc_old = (int)((y_float[0]+0.5*dy_float[0]-display_ymin)*yconv);
-      for(i = 1; i < display_mysize; i++) {
-         xloc = (int)((x_float[i]+0.5*dx_float[i]-display_xmin)*xconv);
-         yloc = (int)((y_float[i]+0.5*dy_float[i]-display_ymin)*yconv);
-         MPE_Draw_line(window,xloc_old,yloc_old,xloc,yloc,MPE_BLACK);
-         xloc_old = xloc;
-         yloc_old = yloc;
-      }
-   }
-#ifdef HAVE_MPI
-   MPI_Barrier(MPI_COMM_WORLD);
-#endif
-   MPE_Update(window);
 #endif
 }
 
@@ -889,11 +603,6 @@ void DrawBoxes(void) {
 void set_display_viewmode(int display_view_mode_in){
    display_view_mode = display_view_mode_in;
 }
-
-//void set_number_of_particles_to_display(int npart_in){
-//     npart = npart_in;
-//}
-
 void set_display_mysize(int display_mysize_in){
    display_mysize = display_mysize_in;
 }
@@ -906,19 +615,8 @@ void set_display_outline(int display_outline_in){
 
 void draw_scene(void) {
 #ifdef HAVE_OPENGL
-   if (rank) return;
-
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    glLoadIdentity();
-#endif
-#ifdef HAVE_MPE
-   if (rank == 0) {
-      MPE_Fill_rectangle(window, 0, 0, WINSIZE, WINSIZE, MPE_WHITE);
-   }
-   MPE_Update(window);
-#ifdef HAVE_MPI
-   MPI_Barrier(MPI_COMM_WORLD);
-#endif
 #endif
 
 
@@ -927,30 +625,6 @@ void draw_scene(void) {
    } else {
       DisplayState();
    }
-
-// I think we can add function to draw particle here KOOa
-// Just set up foe serial for nowa;
-//#ifdef HAVE_OPENGL	
-
-
-    //gluOrtho2D(display_xmin, display_xmax, display_ymin, display_ymax);
-
-    //printf("Inside openGL graphics drawing block");
-    //nparticles = sizeof(xpart_float)/sizeof(xpart_float[0]);
-    //printf("Number of particles to draw: %i", nparticles);
-    //for (int i = 0; i < nparticles; i++) {
-
-    //   glColor3f(0.0f, 0.0f, 0.0f);
-    //   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    //   glBegin(GL_QUADS);
-    //   glVertex2f(xpart_float[i],             ypart_float[i]);
-    //   glVertex2f(xpart_float[i]+dx_float[i], ypart_float[i]);
-    //   glVertex2f(xpart_float[i]+dx_float[i], ypart_float[i]+dy_float[i]);
-    //   glVertex2f(xpart_float[i],             ypart_float[i]+dy_float[i]);
-    //   glEnd();
-  
-   //}
-//#endif 
 
    if (display_mysize <=500) {
       char c[10];
@@ -975,13 +649,7 @@ void draw_scene(void) {
    glLoadIdentity();
 
    glutSwapBuffers();
-#endif
-
-#ifdef HAVE_MPE
-#ifdef HAVE_MPI
-   MPI_Barrier(MPI_COMM_WORLD);
-#endif
-   MPE_Update(window);
+   glutMainLoopEvent();
 #endif
 
    //if (display_mysize <= 500) sleep(1);
@@ -1091,155 +759,11 @@ void Scale() {
    }
 #endif
 
-#ifdef HAVE_MPE
-   color_array = (MPE_Color *) malloc(sizeof(MPE_Color)*ncolors);
-
-   int ierr = MPE_Make_color_array(window, ncolors, color_array);
-   if (ierr && rank == 0) printf("Error(Make_color_array): ierr is %d\n",ierr);
-
-#endif
-}
-
-void mpe_main_loop(void)
-{
-#ifdef HAVE_MPE
-   while (1) {
-      display_get_event();
-      idlefunction();
-   }
-#endif
 }
 
 /********************************************************************************/
 void display_get_event(void)
 /********************************************************************************/
 {
-
-#ifdef HAVE_MPE
-   //double xmid, ymid;
-   //int xrel, yrel;
-   XEvent event;
-   long EventMask;
-   int EventFlag;
-   char keys[20];
-   int numChar;
-   KeySym keysym;
-   XComposeStatus compose;
-   int rank=0;
-   unsigned char key;
-   int button, xloc, yloc, special_event;
-   double xcor, ycor;
-
-
-#ifdef HAVE_MPI
-   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-#endif
-
-   if (window->Cookie != MPE_G_COOKIE) {
-      printf("Handle argument is incorrect or corrupted\n" );
-   }
-
-   key = '\0';
-   button = -1;
-   xcor = 0.0;
-   ycor = 0.0;
-   special_event = 0;
-
-   EventMask= ButtonPressMask | ButtonReleaseMask | KeyPressMask | ExposureMask | StructureNotifyMask ;
-
-
-   EventFlag=0;
-   //if (rank ==0){
-      if(XCheckWindowEvent(window->xwin->disp,window->xwin->win,EventMask,&event)){
-         EventFlag=1;
-      }
-   //}
-#ifdef HAVE_MPI
-   MPI_Bcast(&EventFlag, 1, MPI_INT, 0, MPI_COMM_WORLD);
-#endif
-     
-   if (EventFlag){
-#ifdef HAVE_MPI
-      MPI_Bcast(&event, (int)sizeof(XEvent), MPI_BYTE, 0, MPI_COMM_WORLD);
-#endif
-
-      //printf("Event type is %d\n",event.type);
-      int state;
-      switch(event.type){
-         case ButtonPress:
-            //printf("Button Press is %d\n",event.xbutton.button);
-            button=event.xbutton.button;
-            xloc=event.xbutton.x;
-            yloc=event.xbutton.y;
-            xcor=display_xmin+(double)xloc/xconv;
-            ycor=display_ymin+(double)(height-yloc -1)/yconv;
-
-            state = 1; // Button Down
-            mouseClick((int)event.xbutton.button, state, xloc, yloc);
-
-            //printf("DEBUG graphics -- button is %d loc is %d %d cor is %lf %lf\n",
-            //                       button,    xloc,yloc,xcor,ycor);
-            break;
-         case KeyPress:
-            if (rank == 0) {
-               numChar=XLookupString((XKeyEvent *) &event, keys, 20, &keysym, &compose);
-               printf("%c:%c:%d:\n",keys[0],keys[1],(int)keysym);
-               if(((keysym>=XK_KP_Space)&&(keysym<=XK_KP_9))
-                  ||((keysym>XK_space)&&(keysym<XK_asciitilde))){
-                  key=keys[0];
-               }
-            }
-#ifdef HAVE_MPI
-            MPI_Bcast(&key,           1, MPI_CHAR,   0, MPI_COMM_WORLD);
-#endif
-     
-            xloc=event.xkey.x;
-            yloc=event.xkey.y;
-     
-            xcor=display_xmin+(double)xloc/xconv;
-            ycor=display_ymin+(double)(height-yloc-1)/yconv;
-
-            keyPressed(key, xloc, yloc);
-     
-            //printf("DEBUG graphics -- key is '%c' loc is %d %d cor is %lf %lf\n",
-            //                         key,      xloc,yloc,xcor,ycor);
-            break;
-         case Expose:
-            if (event.xexpose.count == 0){
-               special_event=1;
-            }
-            //printf("DEBUG graphics -- special event is \n",*special_event);
-            break;
-         case ConfigureNotify:
-            /* Window has been resized */
-/*
-            width=event.xconfigure.width; //-SCALEWIDTH;
-            double ratio = (double)event.xconfigure.height/(double)height;
-            height *= ratio;
-     
-            conHeight *= ratio;
-            conWidth  = width - SCALEWIDTH;
-     
-            graHeight = height - conHeight - 2*TEXTHEIGHT;
-            if (graHeight < 0) graHeight  = 0;
-            graWidth  = width - SCALEWIDTH;
-     
-            xconv = (double)conWidth/ (display_xmax-xmin);
-            yconv = (double)conHeight/(display_ymax-display_ymin);
-*/
-
-            //printf("DEBUG graphics -- window has been resized to %d %d\n",width, height);
-            break;
-      } // switch
-     
-      //printf("DEBUG -- button is %d key is '%c' loc is %d %d cor is %lf %lf\n",
-      //                button,     key,      xloc,yloc,xcor,ycor);
-   }
-     
-   //MPE_Update(window);
-   //usleep(300000);
-     
-#endif
-
    return;
 }

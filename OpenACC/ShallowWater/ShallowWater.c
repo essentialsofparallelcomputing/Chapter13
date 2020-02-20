@@ -4,6 +4,10 @@
 #include <unistd.h>
 #include <time.h>
 #include "timer.h"
+#ifdef HAVE_GRAPHICS
+#include "display.h"
+#include "graphics.h"
+#endif
 #include "ShallowWater.h"
 
 /*********************************************************************************************
@@ -72,6 +76,46 @@ int main(int argc, char *argv[])
     }
   }
   
+#ifdef HAVE_GRAPHICS
+  double** restrict dx = malloc2D(ny+2, nx+2);
+  double** restrict dy = malloc2D(ny+2, nx+2);
+  double** restrict x = malloc2D(ny+2, nx+2);
+  double** restrict y = malloc2D(ny+2, nx+2);
+  for(int j=0;j<ny;j++){
+    for(int i=0;i<nx;i++){
+       dx[j][i] = 1.0;
+       dy[j][i] = 1.0;
+       x[j][i] = 0.0 + (double)i * 1.0;
+       y[j][i] = 0.0 + (double)j * 1.0;
+    }
+  }
+  float xwinmin=0.0-2.0;
+  float xwinmax=(float)nx+2.0;
+  float ywinmin=0.0-2.0;
+  float ywinmax=(float)ny+2.0;
+
+  set_display_mysize(nx*ny);
+  set_display_cell_coordinates_double((double *)x, (double *)dx, (double *)y, (double *)dy);
+  set_display_cell_data_double((double *)H);
+
+  set_display_window(xwinmin,xwinmax,ywinmin,ywinmax);
+  set_display_viewmode(1);
+  set_display_outline(1);
+  init_display(&argc, argv, "Shallow Water");
+  draw_scene();
+  //sleep(10);
+
+  set_graphics_mysize(nx*ny);
+  set_graphics_window(xwinmin,xwinmax,ywinmin,ywinmax);
+  set_graphics_viewmode(1);
+  set_graphics_outline(0);
+  set_graphics_cell_coordinates((double *)x, (double *)dx, (double *)y, (double *)dy);
+  set_graphics_cell_data((double *)H);
+  init_graphics_output();
+
+  write_graphics_info(0, 0, 0.0, 0, 0);
+#endif
+
   //print iteration info
   double deltaT = 1.0e30;
   for (int j = 1; j < ny; j++) {
@@ -206,7 +250,15 @@ int main(int argc, char *argv[])
     n+=nburst;
 
     //print iteration info
-    if (n%100 == 0) printf("Iteration:%5.5d, Time:%f, Timestep:%f Total mass:%f\n", n, time, deltaT, TotalMass);
+    if (n%100 == 0) {
+       printf("Iteration:%5.5d, Time:%f, Timestep:%f Total mass:%f\n", n, time, deltaT, TotalMass);
+
+#ifdef HAVE_GRAPHICS
+       set_display_cell_data_double((double *)H);
+       draw_scene();
+       //sleep(10);
+#endif
+    }
 
   }  // End of iteration loop
   

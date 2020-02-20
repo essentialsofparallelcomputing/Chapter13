@@ -65,7 +65,7 @@
 static int magick_on = 0;
 
 #ifdef HAVE_MAGICKWAND
-#include <wand/MagickWand.h>
+#include <MagickWand/MagickWand.h>
 
 #define MAGICK_NCOLORS 1280
 
@@ -113,16 +113,9 @@ static int graphics_outline   = 0;
 static int graphics_view_mode = 0;
 static int graphics_mysize    = 0;
 
-enum spatial_data_type {SPATIAL_DOUBLE, SPATIAL_FLOAT};
-static int spatial_type = SPATIAL_FLOAT;
-
 static double *x_double=NULL, *y_double=NULL, *dx_double=NULL, *dy_double=NULL;
-static float *x_float=NULL, *y_float=NULL, *dx_float=NULL, *dy_float=NULL;
 
-enum plot_data_type {DATA_DOUBLE, DATA_FLOAT};
-static int data_type = DATA_FLOAT;
 static double *data_double=NULL;
-static float *data_float=NULL;
 static int *graphics_proc=NULL;
 
 void init_graphics_output(void){
@@ -163,30 +156,17 @@ void set_graphics_window(float graphics_xmin_in, float graphics_xmax_in, float g
    graphics_ymin = graphics_ymin_in;
    graphics_ymax = graphics_ymax_in;
 }
-void set_graphics_cell_data_double(double *data_in){
-   data_type = DATA_DOUBLE;
+void set_graphics_cell_data(double *data_in){
    data_double = data_in;
-}
-void set_graphics_cell_data_float(float *data_in){
-   data_type = DATA_FLOAT;
-   data_float = data_in;
 }
 void set_graphics_cell_proc(int *graphics_proc_in){
    graphics_proc = graphics_proc_in;
 }
-void set_graphics_cell_coordinates_double(double *x_in, double *dx_in, double *y_in, double *dy_in){
-   spatial_type = SPATIAL_DOUBLE;
+void set_graphics_cell_coordinates(double *x_in, double *dx_in, double *y_in, double *dy_in){
    x_double = x_in;
    dx_double = dx_in;
    y_double = y_in;
    dy_double = dy_in;
-}
-void set_graphics_cell_coordinates_float(float *x_in, float *dx_in, float *y_in, float *dy_in){
-   spatial_type = SPATIAL_FLOAT;
-   x_float = x_in;
-   dx_float = dx_in;
-   y_float = y_in;
-   dy_float = dy_in;
 }
 void set_graphics_viewmode(int graphics_view_mode_in){
    graphics_view_mode = graphics_view_mode_in;
@@ -235,111 +215,69 @@ void DrawSquaresToFile(int graph_num, int ncycle, double simTime, int rollback_i
          DrawSetStrokeOpacity(draw_wand,1);
       }
 
-      if (data_type == DATA_DOUBLE){
-
-         for(int i = 0; i < graphics_mysize; i++) {
-            int magick_color = graphics_proc[i]*magick_step;
-            char cstring[40];
-            sprintf(cstring,"rgba(%d,%d,%d,%d)",MagickRainbow[magick_color].Red,
-                                                MagickRainbow[magick_color].Green,
-                                                MagickRainbow[magick_color].Blue,120);
-            PixelSetColor(pixel_wand, cstring);
+      for(int i = 0; i < graphics_mysize; i++) {
+         int magick_color = graphics_proc[i]*magick_step;
+         char cstring[40];
+         sprintf(cstring,"rgba(%d,%d,%d,%d)",MagickRainbow[magick_color].Red,
+                                             MagickRainbow[magick_color].Green,
+                                             MagickRainbow[magick_color].Blue,120);
+         PixelSetColor(pixel_wand, cstring);
             
 
-            DrawSetFillColor(draw_wand, pixel_wand); 
+         DrawSetFillColor(draw_wand, pixel_wand); 
 
-            DrawRectangle(draw_wand, x_double[i],              y_double[i],
-                                     x_double[i]+dx_double[i], y_double[i]+dy_double[i]);
+         DrawRectangle(draw_wand, x_double[i],              y_double[i],
+                                  x_double[i]+dx_double[i], y_double[i]+dy_double[i]);
 /*
-           printf("DEBUG -- i %d magick_color %d magick_step %d graphics_proc %d cstring %s corners %lg %lg %lg %lg\n",
-               i,magick_color,magick_step,graphics_proc[i],cstring,
-               x_double[i],              y_double[i],
-               x_double[i]+dx_double[i], y_double[i]+dy_double[i]);
+        printf("DEBUG -- i %d magick_color %d magick_step %d graphics_proc %d cstring %s corners %lg %lg %lg %lg\n",
+            i,magick_color,magick_step,graphics_proc[i],cstring,
+            x_double[i],              y_double[i],
+            x_double[i]+dx_double[i], y_double[i]+dy_double[i]);
 */
-         }
+      }
 
-         if (graphics_outline) {
-	    PixelSetColor(pixel_wand,"black");
-	    DrawSetStrokeColor(draw_wand,pixel_wand);
-	    DrawSetStrokeWidth(draw_wand,0.01);
+      if (graphics_outline) {
+         PixelSetColor(pixel_wand,"black");
+         DrawSetStrokeColor(draw_wand,pixel_wand);
+         DrawSetStrokeWidth(draw_wand,0.01);
 
-            double xold = x_double[0]+0.5*dx_double[0];
-            double yold = y_double[0]+0.5*dy_double[0];
+         double xold = x_double[0]+0.5*dx_double[0];
+         double yold = y_double[0]+0.5*dy_double[0];
 
-            for(int i = 0; i < graphics_mysize; i++) {
-               char cstring[40];
-               sprintf(cstring,"%d",i);
-
-               double xnew = x_double[i]+0.5*dx_double[i];
-               double ynew = y_double[i]+0.5*dy_double[i];
-
-               DrawLine(draw_wand, xold, yold, xnew, ynew);
-
-               xold = xnew;
-               yold = ynew;
-            }
-         }
-
-/*
-         // Set up a 12 point black font 
-	 PixelSetColor(pixel_wand,"black");
-	 DrawSetFillColor(draw_wand,pixel_wand);
-	 DrawSetFont (draw_wand, "Courier" ) ;
-	 DrawSetFontSize(draw_wand,0.01);
-	 DrawSetStrokeColor(draw_wand,pixel_wand);
-	 DrawSetStrokeWidth(draw_wand,0.01);
-         DrawSetTextDirection(draw_wand, RightToLeftDirection);
-         DrawSetTextAlignment(draw_wand, CenterAlign);
-         DrawSetTextAntialias(draw_wand,MagickTrue);
-
-         for(int i = 1; i < graphics_mysize; i++) {
+         for(int i = 0; i < graphics_mysize; i++) {
             char cstring[40];
             sprintf(cstring,"%d",i);
 
+            double xnew = x_double[i]+0.5*dx_double[i];
+            double ynew = y_double[i]+0.5*dy_double[i];
 
-            DrawAnnotation(draw_wand, x_double[i]+0.5*dx_double[i], y_double[i]+0.5*dy_double[i], cstring);
+            DrawLine(draw_wand, xold, yold, xnew, ynew);
+
+            xold = xnew;
+            yold = ynew;
          }
-*/
-
-      } else {
-
-         for(int i = 0; i < graphics_mysize; i++) {
-            int magick_color = graphics_proc[i]*magick_step;
-            char cstring[40];
-            sprintf(cstring,"rgba(%d,%d,%d,%d)",MagickRainbow[magick_color].Red,
-                                                MagickRainbow[magick_color].Green,
-                                                MagickRainbow[magick_color].Blue,120);
-            PixelSetColor(pixel_wand, cstring);
-
-            DrawSetFillColor(draw_wand, pixel_wand);
-
-            DrawRectangle(draw_wand, x_float[i],             y_float[i],
-                                     x_float[i]+dx_float[i], y_float[i]+dy_float[i]);
-         }
-
-         if (graphics_outline) {
-	    PixelSetColor(pixel_wand,"black");
-	    DrawSetStrokeColor(draw_wand,pixel_wand);
-	    DrawSetStrokeWidth(draw_wand,0.01);
-
-            float xold = x_float[0]+0.5*dx_float[0];
-            float yold = y_float[0]+0.5*dy_float[0];
-
-            for(int i = 0; i < graphics_mysize; i++) {
-               char cstring[40];
-               sprintf(cstring,"%d",i);
-
-               float xnew = x_float[i]+0.5*dx_float[i];
-               float ynew = y_float[i]+0.5*dy_float[i];
-
-               DrawLine(draw_wand, xold, yold, xnew, ynew);
-
-               xold = xnew;
-               yold = ynew;
-            }
-         }
-
       }
+
+/*
+      // Set up a 12 point black font 
+      PixelSetColor(pixel_wand,"black");
+      DrawSetFillColor(draw_wand,pixel_wand);
+      DrawSetFont (draw_wand, "Courier" ) ;
+      DrawSetFontSize(draw_wand,0.01);
+      DrawSetStrokeColor(draw_wand,pixel_wand);
+      DrawSetStrokeWidth(draw_wand,0.01);
+      DrawSetTextDirection(draw_wand, RightToLeftDirection);
+      DrawSetTextAlignment(draw_wand, CenterAlign);
+      DrawSetTextAntialias(draw_wand,MagickTrue);
+
+      for(int i = 1; i < graphics_mysize; i++) {
+         char cstring[40];
+         sprintf(cstring,"%d",i);
+
+
+         DrawAnnotation(draw_wand, x_double[i]+0.5*dx_double[i], y_double[i]+0.5*dy_double[i], cstring);
+      }
+*/
 
       MagickDrawImage(magick_wand, draw_wand);
 
@@ -380,47 +318,27 @@ void DrawSquaresToFile(int graph_num, int ncycle, double simTime, int rollback_i
       FILE *fp2 = fopen(filename2,"w");
       if(fp && fp2){
          fprintf(fp,"%d,%lf\n",ncycle,simTime);
-         if (data_type == DATA_DOUBLE){
-            for(i = 0; i < graphics_mysize; i++) {
-               xloc = (int)((x_double[i]-graphics_xmin)*xconversion);
-               xwid = (int)((x_double[i]+dx_double[i]-graphics_xmin)*xconversion-xloc);
-               yloc = (int)((graphics_ymax-(y_double[i]+dy_double[i]))*yconversion);
-               ywid = (int)((graphics_ymax-y_double[i])*yconversion);
-               ywid -= yloc;
-               color = graphics_proc[i]*step;
-               //fprintf(fp,"%d,%d,%d,%d,%f\n",xloc,yloc,xwid,ywid,data[i]);
-               fprintf(fp,"%d,%d,%d,%d,%d\n",xloc,yloc,xwid,ywid,color);
-            
-               xloc1 = (int)((x_double[i]-graphics_xmin)*xconversion);
-               xloc2 = (int)((x_double[i]+dx_double[i]-graphics_xmin)*xconversion);
-               yloc1 = (int)((graphics_ymax-y_double[i])*yconversion);
-               yloc2 = (int)((graphics_ymax-(y_double[i]+dy_double[i]))*yconversion);
-               fprintf(fp2,"%d,%d,%d,%d\n",xloc1,yloc2,xloc2,yloc2);
-               fprintf(fp2,"%d,%d,%d,%d\n",xloc1,yloc1,xloc2,yloc1);
-               fprintf(fp2,"%d,%d,%d,%d\n",xloc1,yloc1,xloc1,yloc2);
-               fprintf(fp2,"%d,%d,%d,%d\n",xloc2,yloc1,xloc2,yloc2);
-            }
-         } else {
-            for(i = 0; i < graphics_mysize; i++) {
-               xloc = (int)((x_float[i]-graphics_xmin)*xconversion);
-               xwid = (int)((x_float[i]+dx_float[i]-graphics_xmin)*xconversion-xloc);
-               yloc = (int)((graphics_ymax-(y_float[i]+dy_float[i]))*yconversion);
-               ywid = (int)((graphics_ymax-y_float[i])*yconversion);
-               ywid -= yloc;
-               color = graphics_proc[i]*step;
-               //fprintf(fp,"%d,%d,%d,%d,%f\n",xloc,yloc,xwid,ywid,data[i]);
-               fprintf(fp,"%d,%d,%d,%d,%d\n",xloc,yloc,xwid,ywid,color);
+
+         for(i = 0; i < graphics_mysize; i++) {
+            xloc = (int)((x_double[i]-graphics_xmin)*xconversion);
+            xwid = (int)((x_double[i]+dx_double[i]-graphics_xmin)*xconversion-xloc);
+            yloc = (int)((graphics_ymax-(y_double[i]+dy_double[i]))*yconversion);
+            ywid = (int)((graphics_ymax-y_double[i])*yconversion);
+            ywid -= yloc;
+            color = graphics_proc[i]*step;
+            //fprintf(fp,"%d,%d,%d,%d,%f\n",xloc,yloc,xwid,ywid,data[i]);
+            fprintf(fp,"%d,%d,%d,%d,%d\n",xloc,yloc,xwid,ywid,color);
          
-               xloc1 = (int)((x_float[i]-graphics_xmin)*xconversion);
-               xloc2 = (int)((x_float[i]+dx_float[i]-graphics_xmin)*xconversion);
-               yloc1 = (int)((graphics_ymax-y_float[i])*yconversion);
-               yloc2 = (int)((graphics_ymax-(y_float[i]+dy_float[i]))*yconversion);
-               fprintf(fp2,"%d,%d,%d,%d\n",xloc1,yloc2,xloc2,yloc2);
-               fprintf(fp2,"%d,%d,%d,%d\n",xloc1,yloc1,xloc2,yloc1);
-               fprintf(fp2,"%d,%d,%d,%d\n",xloc1,yloc1,xloc1,yloc2);
-               fprintf(fp2,"%d,%d,%d,%d\n",xloc2,yloc1,xloc2,yloc2);
-            }
+            xloc1 = (int)((x_double[i]-graphics_xmin)*xconversion);
+            xloc2 = (int)((x_double[i]+dx_double[i]-graphics_xmin)*xconversion);
+            yloc1 = (int)((graphics_ymax-y_double[i])*yconversion);
+            yloc2 = (int)((graphics_ymax-(y_double[i]+dy_double[i]))*yconversion);
+            fprintf(fp2,"%d,%d,%d,%d\n",xloc1,yloc2,xloc2,yloc2);
+            fprintf(fp2,"%d,%d,%d,%d\n",xloc1,yloc1,xloc2,yloc1);
+            fprintf(fp2,"%d,%d,%d,%d\n",xloc1,yloc1,xloc1,yloc2);
+            fprintf(fp2,"%d,%d,%d,%d\n",xloc2,yloc1,xloc2,yloc2);
          }
+
          fclose(fp);
          fclose(fp2);
          iteration++;
@@ -462,16 +380,9 @@ void DisplayStateToFile(int graph_num, int ncycle, double simTime, int rollback_
       if (autoscale) {
          scaleMax=-1.0e30;
          scaleMin=1.0e30;
-         if (data_type == DATA_DOUBLE){
-            for(int i = 0; i<graphics_mysize; i++) {
-               if (data_double[i] > scaleMax) scaleMax = data_double[i];
-               if (data_double[i] < scaleMin) scaleMin = data_double[i];
-            }
-         } else {
-            for(int i = 0; i<graphics_mysize; i++) {
-               if (data_float[i] > scaleMax) scaleMax = data_float[i];
-               if (data_float[i] < scaleMin) scaleMin = data_float[i];
-            }
+         for(int i = 0; i<graphics_mysize; i++) {
+            if (data_double[i] > scaleMax) scaleMax = data_double[i];
+            if (data_double[i] < scaleMin) scaleMin = data_double[i];
          }
       }
 
@@ -486,64 +397,31 @@ void DisplayStateToFile(int graph_num, int ncycle, double simTime, int rollback_
          DrawSetStrokeOpacity(draw_wand,1);
       }
 
-      if (data_type == DATA_DOUBLE){
+      for(int i = 0; i < graphics_mysize; i++) {
+         int magick_color;
+         magick_color = (int)(data_double[i]-scaleMin)*magick_step;
+         magick_color = MAGICK_NCOLORS-magick_color;
+         if (magick_color < 0) {
+            magick_color=0;
+         }
+         if (magick_color >= MAGICK_NCOLORS) magick_color = MAGICK_NCOLORS-1;
 
-         for(int i = 0; i < graphics_mysize; i++) {
-            int magick_color;
-            if (data_type == DATA_DOUBLE){
-               magick_color = (int)(data_double[i]-scaleMin)*magick_step;
-            } else {
-               magick_color = (int)(data_float[i]-scaleMin)*magick_step;
-            }
-            magick_color = MAGICK_NCOLORS-magick_color;
-            if (magick_color < 0) {
-               magick_color=0;
-            }
-            if (magick_color >= MAGICK_NCOLORS) magick_color = MAGICK_NCOLORS-1;
+         char cstring[40];
+         sprintf(cstring,"rgba(%d,%d,%d,%d)",MagickRainbow[magick_color].Red,
+                                             MagickRainbow[magick_color].Green,
+                                             MagickRainbow[magick_color].Blue,120);
+         PixelSetColor(pixel_wand, cstring);
 
-            char cstring[40];
-            sprintf(cstring,"rgba(%d,%d,%d,%d)",MagickRainbow[magick_color].Red,
-                                                MagickRainbow[magick_color].Green,
-                                                MagickRainbow[magick_color].Blue,120);
-            PixelSetColor(pixel_wand, cstring);
+         DrawSetFillColor(draw_wand, pixel_wand);
 
-            DrawSetFillColor(draw_wand, pixel_wand);
-
-            DrawRectangle(draw_wand, x_double[i],              y_double[i],
-                                     x_double[i]+dx_double[i], y_double[i]+dy_double[i]);
+         DrawRectangle(draw_wand, x_double[i],              y_double[i],
+                                  x_double[i]+dx_double[i], y_double[i]+dy_double[i]);
 /*
-           printf("DEBUG -- i %d magick_color %d magick_step %d graphics_proc %d cstring %s corners %lg %lg %lg %lg\n",
-               i,magick_color,magick_step,graphics_proc[i],cstring,
-               x_double[i],              y_double[i],
-               x_double[i]+dx_double[i], y_double[i]+dy_double[i]);
+        printf("DEBUG -- i %d magick_color %d magick_step %d graphics_proc %d cstring %s corners %lg %lg %lg %lg\n",
+            i,magick_color,magick_step,graphics_proc[i],cstring,
+            x_double[i],              y_double[i],
+            x_double[i]+dx_double[i], y_double[i]+dy_double[i]);
 */
-         }
-      } else {
-
-         for(int i = 0; i < graphics_mysize; i++) {
-            int magick_color;
-            if (data_type == DATA_DOUBLE){
-               magick_color = (int)(data_double[i]-scaleMin)*magick_step;
-            } else {
-               magick_color = (int)(data_float[i]-scaleMin)*magick_step;
-            }
-            magick_color = MAGICK_NCOLORS-magick_color;
-            if (magick_color < 0) {
-               magick_color=0;
-            }
-            if (magick_color >= MAGICK_NCOLORS) magick_color = MAGICK_NCOLORS-1;
-
-            char cstring[40];
-            sprintf(cstring,"rgba(%d,%d,%d,%d)",MagickRainbow[magick_color].Red,
-                                                MagickRainbow[magick_color].Green,
-                                                MagickRainbow[magick_color].Blue,120);
-            PixelSetColor(pixel_wand, cstring);
-
-            DrawSetFillColor(draw_wand, pixel_wand);
-
-            DrawRectangle(draw_wand, x_float[i],             y_float[i],
-                                     x_float[i]+dx_float[i], y_float[i]+dy_float[i]);
-         }
       }
 
       MagickDrawImage(magick_wand, draw_wand);
@@ -586,16 +464,9 @@ void DisplayStateToFile(int graph_num, int ncycle, double simTime, int rollback_
          if (autoscale) {
             scaleMax=-1.0e30;
             scaleMin=1.0e30;
-            if (data_type == DATA_DOUBLE){
-               for(i = 0; i<graphics_mysize; i++) {
-                  if (data_double[i] > scaleMax) scaleMax = data_double[i];
-                  if (data_double[i] < scaleMin) scaleMin = data_double[i];
-               }
-            } else {
-               for(i = 0; i<graphics_mysize; i++) {
-                  if (data_float[i] > scaleMax) scaleMax = data_float[i];
-                  if (data_float[i] < scaleMin) scaleMin = data_float[i];
-               }
+            for(i = 0; i<graphics_mysize; i++) {
+               if (data_double[i] > scaleMax) scaleMax = data_double[i];
+               if (data_double[i] < scaleMin) scaleMin = data_double[i];
             }
          }
 
@@ -603,52 +474,29 @@ void DisplayStateToFile(int graph_num, int ncycle, double simTime, int rollback_
          int xloc, xwid, yloc, ywid;
          int xloc1, xloc2, yloc1, yloc2;
          for(i = 0; i < graphics_mysize; i++) {
-            if (data_type == DATA_DOUBLE){
-               color = (int)(data_double[i]-scaleMin)*step;
-            } else {
-               color = (int)(data_float[i]-scaleMin)*step;
-            }
+            color = (int)(data_double[i]-scaleMin)*step;
             color = Ncolors-color;
             if (color < 0) {
                color=0;
             }
             if (color >= Ncolors) color = Ncolors-1;
 
-            if (data_type == DATA_DOUBLE){
-               xloc = (int)((x_double[i]-graphics_xmin)*xconversion);
-               xwid = (int)((x_double[i]+dx_double[i]-graphics_xmin)*xconversion-xloc);
-               yloc = (int)((graphics_ymax-(y_double[i]+dy_double[i]))*yconversion);
-               ywid = (int)((graphics_ymax-y_double[i])*yconversion);
-               ywid -= yloc;
-               //fprintf(fp,"%d,%d,%d,%d,%f\n",xloc,yloc,xwid,ywid,data[i]);
-               fprintf(fp,"%d,%d,%d,%d,%d\n",xloc,yloc,xwid,ywid,color);
+            xloc = (int)((x_double[i]-graphics_xmin)*xconversion);
+            xwid = (int)((x_double[i]+dx_double[i]-graphics_xmin)*xconversion-xloc);
+            yloc = (int)((graphics_ymax-(y_double[i]+dy_double[i]))*yconversion);
+            ywid = (int)((graphics_ymax-y_double[i])*yconversion);
+            ywid -= yloc;
+            //fprintf(fp,"%d,%d,%d,%d,%f\n",xloc,yloc,xwid,ywid,data[i]);
+            fprintf(fp,"%d,%d,%d,%d,%d\n",xloc,yloc,xwid,ywid,color);
          
-               xloc1 = (int)((x_double[i]-graphics_xmin)*xconversion);
-               xloc2 = (int)((x_double[i]+dx_double[i]-graphics_xmin)*xconversion);
-               yloc1 = (int)((graphics_ymax-y_double[i])*yconversion);
-               yloc2 = (int)((graphics_ymax-(y_double[i]+dy_double[i]))*yconversion);
-               fprintf(fp2,"%d,%d,%d,%d\n",xloc1,yloc2,xloc2,yloc2);
-               fprintf(fp2,"%d,%d,%d,%d\n",xloc1,yloc1,xloc2,yloc1);
-               fprintf(fp2,"%d,%d,%d,%d\n",xloc1,yloc1,xloc1,yloc2);
-               fprintf(fp2,"%d,%d,%d,%d\n",xloc2,yloc1,xloc2,yloc2);
-            } else {
-               xloc = (int)((x_float[i]-graphics_xmin)*xconversion);
-               xwid = (int)((x_float[i]+dx_float[i]-graphics_xmin)*xconversion-xloc);
-               yloc = (int)((graphics_ymax-(y_float[i]+dy_float[i]))*yconversion);
-               ywid = (int)((graphics_ymax-y_float[i])*yconversion);
-               ywid -= yloc;
-               //fprintf(fp,"%d,%d,%d,%d,%f\n",xloc,yloc,xwid,ywid,data[i]);
-               fprintf(fp,"%d,%d,%d,%d,%d\n",xloc,yloc,xwid,ywid,color);
-         
-               xloc1 = (int)((x_float[i]-graphics_xmin)*xconversion);
-               xloc2 = (int)((x_float[i]+dx_float[i]-graphics_xmin)*xconversion);
-               yloc1 = (int)((graphics_ymax-y_float[i])*yconversion);
-               yloc2 = (int)((graphics_ymax-(y_float[i]+dy_float[i]))*yconversion);
-               fprintf(fp2,"%d,%d,%d,%d\n",xloc1,yloc2,xloc2,yloc2);
-               fprintf(fp2,"%d,%d,%d,%d\n",xloc1,yloc1,xloc2,yloc1);
-               fprintf(fp2,"%d,%d,%d,%d\n",xloc1,yloc1,xloc1,yloc2);
-               fprintf(fp2,"%d,%d,%d,%d\n",xloc2,yloc1,xloc2,yloc2);
-            }
+            xloc1 = (int)((x_double[i]-graphics_xmin)*xconversion);
+            xloc2 = (int)((x_double[i]+dx_double[i]-graphics_xmin)*xconversion);
+            yloc1 = (int)((graphics_ymax-y_double[i])*yconversion);
+            yloc2 = (int)((graphics_ymax-(y_double[i]+dy_double[i]))*yconversion);
+            fprintf(fp2,"%d,%d,%d,%d\n",xloc1,yloc2,xloc2,yloc2);
+            fprintf(fp2,"%d,%d,%d,%d\n",xloc1,yloc1,xloc2,yloc1);
+            fprintf(fp2,"%d,%d,%d,%d\n",xloc1,yloc1,xloc1,yloc2);
+            fprintf(fp2,"%d,%d,%d,%d\n",xloc2,yloc1,xloc2,yloc2);
          }
          fclose(fp);
          fclose(fp2);   

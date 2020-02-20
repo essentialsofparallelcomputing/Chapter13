@@ -4,6 +4,9 @@ project (ShallowWater)
 set (CMAKE_C_STANDARD 99)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+#if (NOT TARGET distclean)
+#   INCLUDE( cmake/Modules/TargetDistclean.cmake OPTIONAL)
+#endif (NOT TARGET distclean)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O3")
 
@@ -14,11 +17,9 @@ endif (NOT CMAKE_OPENACC_VERBOSE)
 find_package(Vector)
 if (CMAKE_VECTOR_VERBOSE)
     set(VECTOR_C_FLAGS "${VECTOR_C_FLAGS} ${VECTOR_C_VERBOSE}")
-    set(VECTOR_CXX_FLAGS "${VECTOR_CXX_FLAGS} ${VECTOR_CXX_VERBOSE}")
 endif (CMAKE_VECTOR_VERBOSE)
 if (CMAKE_VECTOR_NOVEC)
     set(VECTOR_C_FLAGS "${VECTOR_NOVEC_C_FLAGS}")
-    set(VECTOR_CXX_FLAGS "${VECTOR_NOVEC_CXX_FLAGS}")
 endif (CMAKE_VECTOR_NOVEC)
 
 find_package(OpenACC)
@@ -27,39 +28,51 @@ if (CMAKE_OPENACC_VERBOSE)
     set(OpenACC_C_FLAGS "${OpenACC_C_FLAGS} ${OpenACC_C_VERBOSE}")
 endif (CMAKE_OPENACC_VERBOSE)
 
-if (CMAKE_OPENACCXX_VERBOSE)
-    set(OpenACCXX_CXX_FLAGS "${OpenACCXX_CXX_FLAGS} ${OpenACCXX_CXX_VERBOSE}")
-endif (CMAKE_OPENACCXX_VERBOSE)
-
 add_subdirectory(graphics)
+
+if (ENABLE_GRAPHICS)
+   add_definitions(-DHAVE_GRAPHICS=1)
+   include_directories(graphics)
+endif (ENABLE_GRAPHICS)
 
 # Adds build target of ShallowWater with source code files
 add_executable(ShallowWater ShallowWater.c memory.c timer.c)
 target_link_libraries(ShallowWater -lm)
+if (ENABLE_GRAPHICS)
+   target_link_libraries(ShallowWater graphics ${FREEGLUT_LIBRARIES})
+endif (ENABLE_GRAPHICS)
 
 # Adds build target of ShallowWater_par1 with source code files
-add_executable(ShallowWater_par1 ShallowWater_par1.c memory.c timer.c)
-set_source_files_properties(ShallowWater_par1.c PROPERTIES COMPILE_FLAGS "${OpenACC_C_FLAGS} ${VECTOR_C_FLAGS}")
-set_target_properties(ShallowWater_par1 PROPERTIES LINK_FLAGS "${OpenACC_C_FLAGS}")
-target_link_libraries(ShallowWater_par1 -lm)
+if (HAVE_OPENACC)
+   add_executable(ShallowWater_par1 ShallowWater_par1.c memory.c timer.c)
+   set_source_files_properties(ShallowWater_par1.c PROPERTIES COMPILE_FLAGS "${OpenACC_C_FLAGS} ${VECTOR_C_FLAGS}")
+   set_target_properties(ShallowWater_par1 PROPERTIES LINK_FLAGS "${OpenACC_C_FLAGS}")
+   target_link_libraries(ShallowWater_par1 -lm)
+endif (HAVE_OPENACC)
 
 # Adds build target of ShallowWater_par2 with source code files
-add_executable(ShallowWater_par2 ShallowWater_par2.c memory.c timer.c)
-set_source_files_properties(ShallowWater_par2.c PROPERTIES COMPILE_FLAGS "${OpenACC_C_FLAGS} ${VECTOR_C_FLAGS}")
-set_target_properties(ShallowWater_par2 PROPERTIES LINK_FLAGS "${OpenACC_C_FLAGS}")
-target_link_libraries(ShallowWater_par2 -lm)
+if (HAVE_OPENACC)
+   add_executable(ShallowWater_par2 ShallowWater_par2.c memory.c timer.c)
+   set_source_files_properties(ShallowWater_par2.c PROPERTIES COMPILE_FLAGS "${OpenACC_C_FLAGS} ${VECTOR_C_FLAGS}")
+   set_target_properties(ShallowWater_par2 PROPERTIES LINK_FLAGS "${OpenACC_C_FLAGS}")
+   target_link_libraries(ShallowWater_par2 -lm)
+endif (HAVE_OPENACC)
 
 # Adds build target of ShallowWater_par3 with source code files
-add_executable(ShallowWater_par3 ShallowWater_par3.c memory.c timer.c)
-set_source_files_properties(ShallowWater_par3.c PROPERTIES COMPILE_FLAGS "${OpenACC_C_FLAGS} ${VECTOR_C_FLAGS}")
-set_target_properties(ShallowWater_par3 PROPERTIES LINK_FLAGS "${OpenACC_C_FLAGS}")
-target_link_libraries(ShallowWater_par3 -lm)
+if (HAVE_OPENACC)
+   add_executable(ShallowWater_par3 ShallowWater_par3.c memory.c timer.c)
+   set_source_files_properties(ShallowWater_par3.c PROPERTIES COMPILE_FLAGS "${OpenACC_C_FLAGS} ${VECTOR_C_FLAGS}")
+   set_target_properties(ShallowWater_par3 PROPERTIES LINK_FLAGS "${OpenACC_C_FLAGS}")
+   target_link_libraries(ShallowWater_par3 -lm)
+endif (HAVE_OPENACC)
 
 # Adds build target of ShallowWater_par4 with source code files
-add_executable(ShallowWater_par4 ShallowWater_par4.c memory.c timer.c)
-set_source_files_properties(ShallowWater_par4.c PROPERTIES COMPILE_FLAGS "${OpenACC_C_FLAGS} ${VECTOR_C_FLAGS}")
-set_target_properties(ShallowWater_par4 PROPERTIES LINK_FLAGS "${OpenACC_C_FLAGS}")
-target_link_libraries(ShallowWater_par4 -lm)
+if (HAVE_OPENACC)
+   add_executable(ShallowWater_par4 ShallowWater_par4.c memory.c timer.c)
+   set_source_files_properties(ShallowWater_par4.c PROPERTIES COMPILE_FLAGS "${OpenACC_C_FLAGS} ${VECTOR_C_FLAGS}")
+   set_target_properties(ShallowWater_par4 PROPERTIES LINK_FLAGS "${OpenACC_C_FLAGS}")
+   target_link_libraries(ShallowWater_par4 -lm)
+endif (HAVE_OPENACC)
 
 # Cleanup
 add_custom_target(distclean COMMAND rm -rf CMakeCache.txt CMakeFiles
