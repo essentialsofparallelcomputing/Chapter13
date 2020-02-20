@@ -43,36 +43,36 @@ if (ENABLE_GRAPHICS)
 endif (ENABLE_GRAPHICS)
 
 # Adds build target of ShallowWater_par1 with source code files
-if (HAVE_OPENACC)
+if (OpenACC_C_FOUND)
    add_executable(ShallowWater_par1 ShallowWater_par1.c memory.c timer.c)
    set_source_files_properties(ShallowWater_par1.c PROPERTIES COMPILE_FLAGS "${OpenACC_C_FLAGS} ${VECTOR_C_FLAGS}")
    set_target_properties(ShallowWater_par1 PROPERTIES LINK_FLAGS "${OpenACC_C_FLAGS}")
    target_link_libraries(ShallowWater_par1 -lm)
-endif (HAVE_OPENACC)
+endif (OpenACC_C_FOUND)
 
 # Adds build target of ShallowWater_par2 with source code files
-if (HAVE_OPENACC)
+if (OpenACC_C_FOUND)
    add_executable(ShallowWater_par2 ShallowWater_par2.c memory.c timer.c)
    set_source_files_properties(ShallowWater_par2.c PROPERTIES COMPILE_FLAGS "${OpenACC_C_FLAGS} ${VECTOR_C_FLAGS}")
    set_target_properties(ShallowWater_par2 PROPERTIES LINK_FLAGS "${OpenACC_C_FLAGS}")
    target_link_libraries(ShallowWater_par2 -lm)
-endif (HAVE_OPENACC)
+endif (OpenACC_C_FOUND)
 
 # Adds build target of ShallowWater_par3 with source code files
-if (HAVE_OPENACC)
+if (OpenACC_C_FOUND)
    add_executable(ShallowWater_par3 ShallowWater_par3.c memory.c timer.c)
    set_source_files_properties(ShallowWater_par3.c PROPERTIES COMPILE_FLAGS "${OpenACC_C_FLAGS} ${VECTOR_C_FLAGS}")
    set_target_properties(ShallowWater_par3 PROPERTIES LINK_FLAGS "${OpenACC_C_FLAGS}")
    target_link_libraries(ShallowWater_par3 -lm)
-endif (HAVE_OPENACC)
+endif (OpenACC_C_FOUND)
 
 # Adds build target of ShallowWater_par4 with source code files
-if (HAVE_OPENACC)
+if (OpenACC_C_FOUND)
    add_executable(ShallowWater_par4 ShallowWater_par4.c memory.c timer.c)
    set_source_files_properties(ShallowWater_par4.c PROPERTIES COMPILE_FLAGS "${OpenACC_C_FLAGS} ${VECTOR_C_FLAGS}")
    set_target_properties(ShallowWater_par4 PROPERTIES LINK_FLAGS "${OpenACC_C_FLAGS}")
    target_link_libraries(ShallowWater_par4 -lm)
-endif (HAVE_OPENACC)
+endif (OpenACC_C_FOUND)
 
 # Cleanup
 add_custom_target(distclean COMMAND rm -rf CMakeCache.txt CMakeFiles

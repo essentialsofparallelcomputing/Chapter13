@@ -8,10 +8,10 @@ rm -rf prof
 mkdir prof
 for prog in ShallowWater.c ShallowWater_par1.c ShallowWater_par2.c ShallowWater_par3.c ShallowWater_par4.c
 do
-   sed -e '1,$s/ntimes = 2000/ntimes = 4/' ${prog} > prof/${prog}
+   sed -e '1,$s/ntimes = 2000, nburst = 100/ntimes = 4, nburst = 4/' ${prog} > prof/${prog}
 done
 cd prof
-cp ../ShallowWater.h ../CMakeLists.txt ../memory.c ../timer.h ../timer.c .
+cp -r ../ShallowWater.h ../CMakeLists.txt ../memory.c ../timer.h ../timer.c ../cmake ../graphics .
 cmake .
 make
 
@@ -27,4 +27,4 @@ tar -cvf ShallowProf.tgz *.out *.prof # *.summary
 #tar -cvf ShallowProfSmall.tgz *.out *.prof # *.summary
 
 mv ShallowProf.tgz ShallowProf_v100_9.1.tgz
-mv ShallowProfSmall.tgz ShallowProfSmall_v100_9.1.tgz
+#mv ShallowProfSmall.tgz ShallowProfSmall_v100_9.1.tgz
