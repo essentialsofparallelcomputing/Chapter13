@@ -53,6 +53,7 @@ find_package(ImageMagick COMPONENTS MagickWand)
 #   ImageMagick_<component>_LIBRARIES    - Full path to <component> libraries.
 if (ImageMagick_FOUND)
    if (ImageMagick_MagickWand_FOUND)
+      set(ImageMagick_MagickWand_FOUND on PARENT_SCOPE)
       add_definitions(-DHAVE_MAGICKWAND)
       add_definitions(-DMAGICKCORE_HDRI_ENABLE=0)
       add_definitions(-DMAGICKCORE_QUANTUM_DEPTH=16)

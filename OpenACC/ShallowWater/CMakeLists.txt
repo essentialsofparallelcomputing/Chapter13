@@ -45,6 +45,10 @@ if (ENABLE_GRAPHICS)
    target_link_libraries(ShallowWater graphics ${FREEGLUT_LIBRARIES})
 endif (ENABLE_GRAPHICS)
 
+if (ImageMagick_MagickWand_FOUND)
+   add_definitions(-DHAVE_MAGICKWAND)
+endif (ImageMagick_MagickWand_FOUND)
+
 # Adds build target of ShallowWater_par1 with source code files
 if (OpenACC_C_FOUND)
    add_executable(ShallowWater_par1 ShallowWater_par1.c memory.c timer.c)

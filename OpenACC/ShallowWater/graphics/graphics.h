@@ -79,7 +79,7 @@ enum graphics_file_type{
 
 void set_graphics_window(float graphics_xmin_in, float graphics_xmax_in,
                          float graphics_ymin_in, float graphics_ymax_in);
-void init_graphics_output(void);
+void init_graphics_output(enum graphics_file_type graphics_type_in);
 void terminate_graphics_output(void);
 void set_graphics_viewmode(int graphics_view_mode_in);
 void set_graphics_mysize(int graphics_mysize_in);

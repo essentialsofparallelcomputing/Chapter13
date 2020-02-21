@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include <unistd.h>
 #include <time.h>
@@ -23,6 +24,7 @@
 /* Memory allocation routines */
 double **malloc2D(int m, int n);
 
+
 int main(int argc, char *argv[])
 {
   int      nx = 500, ny = 200;
@@ -34,6 +36,19 @@ int main(int argc, char *argv[])
   double   totaltime;   //variables to calculate time taken for the program to run
   struct   timespec starttime;
   double   TotalMass, origTM;    //variables for checking conservation of mass
+  int graphics_type = GRAPHICS_NONE;
+  char *graphics_type_string = getenv("GRAPHICS_TYPE");
+  printf("Setting graphics type to %s\n",graphics_type_string);
+  if (strcmp(graphics_type_string, "DATA") == 0)      graphics_type = GRAPHICS_DATA;
+#ifdef HAVE_MAGICKWAND
+     if (strcmp(graphics_type_string, "BMP")  == 0) graphics_type = GRAPHICS_BMP;
+     if (strcmp(graphics_type_string, "GIF")  == 0) graphics_type = GRAPHICS_GIF;
+     if (strcmp(graphics_type_string, "JPEG") == 0) graphics_type = GRAPHICS_JPEG;
+     if (strcmp(graphics_type_string, "MPEG") == 0) graphics_type = GRAPHICS_MPEG;
+     if (strcmp(graphics_type_string, "PDF")  == 0) graphics_type = GRAPHICS_PDF;
+     if (strcmp(graphics_type_string, "PNG")  == 0) graphics_type = GRAPHICS_PNG;
+     if (strcmp(graphics_type_string, "SVG")  == 0) graphics_type = GRAPHICS_SVG;
+#endif
   
   /* allocate the memory dynamically for the matrix */
   // state variables
@@ -111,9 +126,10 @@ int main(int argc, char *argv[])
   set_graphics_outline(0);
   set_graphics_cell_coordinates((double *)x, (double *)dx, (double *)y, (double *)dy);
   set_graphics_cell_data((double *)H);
-  init_graphics_output();
+  init_graphics_output(graphics_type);
 
-  write_graphics_info(0, 0, 0.0, 0, 0);
+  int graph_num = 0;
+  write_graphics_info(graph_num, 0, 0.0, 0, 0);
 #endif
 
   //print iteration info
@@ -259,7 +275,8 @@ int main(int argc, char *argv[])
     //sleep(10);
 
     set_graphics_cell_data((double *)H);
-    write_graphics_info(0, 0, 0.0, 0, 0);
+    write_graphics_info(graph_num, n, time, 0, 0);
+    graph_num++;
 #endif
 
   }  // End of iteration loop

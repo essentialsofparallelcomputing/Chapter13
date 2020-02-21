@@ -122,7 +122,7 @@ static double *x_double=NULL, *y_double=NULL, *dx_double=NULL, *dy_double=NULL;
 static double *data_double=NULL;
 static int *graphics_proc=NULL;
 
-void init_graphics_output(void){
+void init_graphics_output(enum graphics_file_type graphics_type_in){
    width = (WINSIZE / (graphics_ymax - graphics_ymin)) * (graphics_xmax - graphics_xmin);
    xconversion = (double)WINSIZE/ (graphics_xmax - graphics_xmin);
    yconversion = (double)WINSIZE/(graphics_ymax - graphics_ymin);
@@ -131,6 +131,8 @@ void init_graphics_output(void){
    if (stat(graphics_directory,&stat_descriptor) == -1){
      mkdir(graphics_directory,0777);
    }
+
+   graphics_type = graphics_type_in;
 
    if (graphics_type != GRAPHICS_DATA && graphics_type != GRAPHICS_NONE) magick_on = 1;
 
