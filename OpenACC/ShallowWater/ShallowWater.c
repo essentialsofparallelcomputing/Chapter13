@@ -257,6 +257,9 @@ int main(int argc, char *argv[])
     provide_sim_progress(time, n);
     draw_scene();
     //sleep(10);
+
+    set_graphics_cell_data((double *)H);
+    write_graphics_info(0, 0, 0.0, 0, 0);
 #endif
 
   }  // End of iteration loop

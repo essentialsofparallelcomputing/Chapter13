@@ -65,7 +65,11 @@
 static int magick_on = 0;
 
 #ifdef HAVE_MAGICKWAND
+#ifdef ImageMagickWand
+#include <wand/MagickWand.h>
+#else
 #include <MagickWand/MagickWand.h>
+#endif
 
 #define MAGICK_NCOLORS 1280
 
