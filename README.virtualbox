@@ -92,7 +92,8 @@ sudo apt-get -f install -y
 # export PATH=/opt/CodeXL_2.6-302:${PATH}
 # run with ./CodeXL or CodeXL once it is in your path
 
-
+sudo apt install cmake imagemagick libmagickwand-dev
+sudo apt-get install libglu1-mesa-dev freeglut3-dev mesa-common-dev -y
 
 # ====================
 
