@@ -378,7 +378,7 @@ void DisplayState(void) {
 
     DrawString (text_position(display_xmax,
                               display_xmin,
-                              0.25),
+                              0.90),
                 text_position(display_ymax,
                               display_ymin,
                               0.98),
@@ -393,14 +393,14 @@ void DisplayState(void) {
     sprintf(sim_cycle_text, "sim cycle: %i", sim_cycle);
     DrawString (text_position(display_xmax,
                               display_xmin,
-                              0.50),
+                              0.35),
                 text_position(display_ymax,
                               display_ymin,
                               0.98),
                 0, sim_time_text);
     DrawString (text_position(display_xmax,
                               display_xmin,
-                              0.75),
+                              0.65),
                 text_position(display_ymax,
                               display_ymin,
                               0.98),
