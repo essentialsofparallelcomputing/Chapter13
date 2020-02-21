@@ -1,0 +1,4 @@
+==129911== NVPROF is profiling process 129911, command: ./ShallowWater_par4
+Iteration:00000, Time:0.000000, Timestep:0.048059 Total mass:399200.000000
+ Flow finished in 0.031942 seconds
+==129911== Generated result file: /home/brobey/EssentialsofParallelComputing/Chapter13/OpenACC/ShallowWater/prof/ShallowWater_par4_timeline.prof
