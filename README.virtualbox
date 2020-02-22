@@ -24,9 +24,6 @@
 
 # Select iso file saved earlier [ubuntu-18.04.2-desktop-amd64.iso]
 
-# Switch to Scaled View. It is under View menu or use Right-Command C to switch back and forth
-# Main menu bar is hidden (access it by right command home (left command))
-
 # Select Install Ubuntu
 
 # Keyboard -- continue
@@ -59,7 +56,7 @@
 # sudo apt install git
 
 
-# git clone https://github.com/essentialsofparallelcomputing/Chapter12.git
+# git clone https://github.com/essentialsofparallelcomputing/Chapter13.git
 
 # Chapter13/README.virtualbox
 
@@ -79,7 +76,7 @@ sudo apt-get install virtualbox-guest-additions-iso -y
 #     reboot and test copy paste
 # Copy on Mac is command-C and paste in Ubuntu is shift-ctrl-v
 
-sudo apt install nvidia-visual-profiler -y
+sudo apt install nvidia-visual-profiler nvidia-nsight -y
 
 # To run nvvp -- nvvp
 
