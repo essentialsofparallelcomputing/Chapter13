@@ -2,6 +2,7 @@
 # Download VirtualBox and install
 
 # Download Ubuntu desktop install and save on local disk [ubuntu-18.04.2-desktop-amd64.iso]
+# Download virtualbox-guest-additions-iso
 
 # Setup new machine
 
@@ -51,22 +52,11 @@
 
 # click through whats new
 
+
 # select dots at bottom left and terminal
 
-# sudo apt install git
-
-
-# git clone https://github.com/essentialsofparallelcomputing/Chapter13.git
-
-# Chapter13/README.virtualbox
-
-# ====
-sudo apt-get update
-
-sudo apt install build-essential dkms -y
-sudo apt-get install virtualbox-guest-additions-iso -y
-
-# if does not automatically run, go to file manager and clic on the CD. Choose Open Autorun Prompt
+# sudo apt install build-essential dkms git -y
+# Now go up to devices and insert virtualbox-guest-additions-iso
 
 # Make virtualbox window active and select devices from window menus at top of screen
 #     Shared Clipboard --> bidirectional
@@ -76,12 +66,22 @@ sudo apt-get install virtualbox-guest-additions-iso -y
 #     reboot and test copy paste
 # Copy on Mac is command-C and paste in Ubuntu is shift-ctrl-v
 
+# Reboot to get cut and paste and screen size fixed
+
+# git clone https://github.com/essentialsofparallelcomputing/Chapter13.git
+
+# Run this README as a script to install rest of packages
+#    Chapter13/README.virtualbox
+
+# ====
+sudo apt-get update
+
 sudo apt install nvidia-visual-profiler nvidia-nsight -y
 
 # To run nvvp -- nvvp
 
 wget https://github.com/GPUOpen-Tools/CodeXL/releases/download/v2.6/codexl_2.6-302_amd64.deb
-sudo dpkg -i codexl_2.6-302_amd64.deb
+sudo dpkg -i codexl_2.6-302_amd64.deb -y
 sudo apt-get -f install -y
 
 # AMD profiler should be in /opt/CodeXL_2.6-302
@@ -89,7 +89,7 @@ sudo apt-get -f install -y
 # export PATH=/opt/CodeXL_2.6-302:${PATH}
 # run with ./CodeXL or CodeXL once it is in your path
 
-sudo apt install cmake imagemagick libmagickwand-dev
+sudo apt install cmake imagemagick libmagickwand-dev -y
 sudo apt-get install libglu1-mesa-dev freeglut3-dev mesa-common-dev -y
 
 # ====================
