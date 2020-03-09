@@ -1,0 +1,51 @@
+To run the example in docker, do the following
+
+Download the docker install file for your system
+
+For the pre-built docker image, run (future build)
+
+   docker run -p 4000:80 -it --entrypoint /bin/bash essentialsofparallelcomputing/chapter13
+
+Alternatively, build an image locally and run it 
+
+   docker build -t chapter13 .
+
+   docker run -it --entrypoint /bin/bash chapter13
+
+To run the docker image with a graphical user interface (GUI) on Mac OSx
+
+install XQuartz -- brew cask install xQuartz
+
+start up xQuartz (may have to start up an app with a right click) and then in the menu bar at the top of the screen, 
+select XQuartz->Preferences. Go to Security tab and add allow connections from network clients
+
+reboot Mac system
+
+Start up xQuartz
+
+Start up docker image with
+
+docker run -it -e DISPLAY=host.docker.internal:0 -v /tmp/.X11-unix:/tmp/.X11-unix --entrypoint /bin/bash chapter13
+
+Change to chapter13 user
+
+su chapter13
+
+Get address
+ifconfig eth0
+
+On Host -- 
+   xhost +<address from ifconfig>
+   xhost +127.0.0.1
+To debug, use "xhost +" temporarily to see if you have things set up correctly. This is not recommended
+for regular use because it allows anyone to access your system
+
+Now run the GUI with
+
+nvvp 
+
+Other applications such as CodeXL may still have difficulties
+
+Getting access to the GPUs is done with the --gpus option to Docker. This feature was added with 
+the 19.0.3 version of Docker.
+

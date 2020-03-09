@@ -1,8 +1,11 @@
+# These are instructions to setup a Ubuntu virtual machine for the examples in
+# this chapter. The first part of the instructions must be done manually. The
+# last half can be done by exiting this file as a script as instructed.
 
 # Download VirtualBox and install
 
 # Download Ubuntu desktop install and save on local disk [ubuntu-18.04.2-desktop-amd64.iso]
-# Download virtualbox-guest-additions-iso
+# Download VBoxGuestAdditions.iso
 
 # Setup new machine
 
@@ -52,8 +55,7 @@
 
 # click through whats new
 
-
-# select dots at bottom left and terminal
+# select dots at bottom left and start up a terminal
 
 # sudo apt install build-essential dkms git -y
 # Now go up to devices and insert virtualbox-guest-additions-iso
@@ -80,8 +82,8 @@ sudo apt install nvidia-visual-profiler nvidia-nsight -y
 
 # To run nvvp -- nvvp
 
-wget https://github.com/GPUOpen-Tools/CodeXL/releases/download/v2.6/codexl_2.6-302_amd64.deb
-sudo dpkg -i codexl_2.6-302_amd64.deb -y
+wget https://github.com/GPUOpen-Tools/CodeXL/releases/download/v2.6/codexl_2.6-302_amd64.deb -y
+sudo dpkg -i codexl_2.6-302_amd64.deb
 sudo apt-get -f install -y
 
 # AMD profiler should be in /opt/CodeXL_2.6-302
@@ -92,13 +94,6 @@ sudo apt-get -f install -y
 sudo apt install cmake imagemagick libmagickwand-dev -y
 sudo apt-get install libglu1-mesa-dev freeglut3-dev mesa-common-dev -y
 
-# ====================
+# If Software updater prompts, install updated software --> takes some time
 
-# Manually select pull-down menu Devices -> Install Guest additions
-# May need to shutdown and restart guest VM
-
-#sudo apt install openjdk-8-jdk
-# sudo update-alternatives --config java
-# and pick the java-8
-
-# If Software updater prompts, install updated software --> wait ....
+sudo usermod -aG vboxsf chapter13
