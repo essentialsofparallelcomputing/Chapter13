@@ -31,15 +31,6 @@ Change to chapter13 user
 
 su chapter13
 
-Get address
-ifconfig eth0
-
-On Host -- 
-   xhost +<address from ifconfig>
-   xhost +127.0.0.1
-To debug, use "xhost +" temporarily to see if you have things set up correctly. This is not recommended
-for regular use because it allows anyone to access your system
-
 Now run the GUI with
 
 nvvp 
