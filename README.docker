@@ -37,6 +37,10 @@ nvvp
 
 Other applications such as CodeXL may still have difficulties
 
-Getting access to the GPUs is done with the --gpus option to Docker. This feature was added with 
-the 19.0.3 version of Docker.
+Getting access to the Nvidia GPUs is done with the --gpus option to Docker. This feature was added with 
+the 19.0.3 version of Docker. For Intel GPUs, try --device=/dev/dri. For AMD GPUs, try
+
+docker run -it --device=/dev/kfd --device=/dev/dri --security-opt seccomp=unconfined
+
+For Intel Advisor, Inspector or VTune, add --cap-add=SYS_ADMIN --cap-add=SYS_PTRACE to the docker run command.
 
