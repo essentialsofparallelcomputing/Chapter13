@@ -1,55 +1,15 @@
 # These are instructions to setup a Ubuntu virtual machine for the examples in
 # this chapter. The first part of the instructions must be done manually. The
-# last half can be done by exiting this file as a script as instructed.
+# last half can be done by executing this file as a script as instructed.
 
 # Download VirtualBox and install
 
-# Download Ubuntu desktop install and save on local disk [ubuntu-18.04.2-desktop-amd64.iso]
+# Download Ubuntu desktop install and save on local disk [ubuntu-20.04-desktop-amd64.iso]
 # Download VBoxGuestAdditions.iso
+# On Mac already at /Applications/VirtualBox.app/Contents/MacOS/VBoxGuestAdditions.iso
 
 # Setup new machine
-
-# Click on New
-
-# Type in a name [chapter13]
-# Select Linux and Ubuntu 64-bit
-
-# Select the amount of memory [8192]
-
-# Create a virtual hard disk now
-# Select VDI VirtualBox Disk Image
-
-# Select Fixed Size Disk
-# Select 50 GB
-
-# Should see the new virtual machine added to the list
-
-# Start Ubuntu virtual machine (Green arrow, start)
-
-# Select iso file saved earlier [ubuntu-18.04.2-desktop-amd64.iso]
-
-# Select Install Ubuntu
-
-# Keyboard -- continue
-
-# Select minimal, download updates while installing and install third-party
-
-# Select Erase disk and install Ubuntu
-# Select Install Now
-
-# Select timezone
-
-# Your name [chapter13]
-# Your computer's name [chapter13-virtualbox]
-# Username [chapter13]
-# password [chapter13]
-# Select "Require my password to log in"
-
-# Select continue
-
-# Long time ....
-
-# Installation is complete, Restart computer
+# See the README.autovirtualbox script for directions for setting up base virtual machine
 
 # sign in
 
@@ -57,44 +17,61 @@
 
 # select dots at bottom left and start up a terminal
 
-# sudo apt install build-essential dkms git -y
-# Now go up to devices and insert virtualbox-guest-additions-iso
-
-# Make virtualbox window active and select devices from window menus at top of screen
-#     Shared Clipboard --> bidirectional
-#     Drag and Drop --> bidirectional
-#     Install guest additions (under devices pull-down
-#     Remove optical disk -- from desktop, right click and eject or from devices-->optical disk-->remove disk from virtual drive
-#     reboot and test copy paste
-# Copy on Mac is command-C and paste in Ubuntu is shift-ctrl-v
-
 # Reboot to get cut and paste and screen size fixed
 
-# git clone https://github.com/essentialsofparallelcomputing/Chapter13.git
+# Add user to sudo list if needed
+# su
+# visudo
+# add %vboxsf ALL=(ALL) ALL
+# exit
 
-# Run this README as a script to install rest of packages
-#    Chapter13/README.virtualbox
+# sudo apt-get install -y git
 
-# ====
-sudo apt-get update
+# Need script on guest to execute
+# git clone --recursive https://github.com/essentialsofparallelcomputing/Chapter13.git
+# Run the script Chapter13/README.virtualbox
 
-sudo apt install nvidia-cuda-toolkit -y
-sudo apt install nvidia-visual-profiler nvidia-nsight -y
+DEBIAN_FRONTEND=noninteractive
+sudo apt-get -qq update && \
+sudo apt-get -qq install -y cmake git vim gcc g++ gfortran software-properties-common \
+             wget gnupg-agent && \
+sudo apt-get clean && \
+sudo rm -rf /var/lib/apt/lists/*
 
-# To run nvvp -- nvvp
+# Installing latest GCC compiler (version 8) for best vectorization
+sudo apt-get -qq update && \
+sudo apt-get -qq install -y gcc-8 g++-8 gfortran-8 \
+                            gcc-9 g++-9 gfortran-9 \
+                            gcc-10 g++-10 gfortran-10 && \
+sudo apt-get clean && \
+sudo rm -rf /var/lib/apt/lists/*
 
-wget https://github.com/GPUOpen-Tools/CodeXL/releases/download/v2.6/codexl_2.6-302_amd64.deb
-sudo dpkg -i codexl_2.6-302_amd64.deb
-sudo apt-get -f install -y
+sudo update-alternatives --install /usr/bin/gcc       gcc       /usr/bin/gcc-8 90 \
+                         --slave   /usr/bin/g++       g++       /usr/bin/g++-8 \
+                         --slave   /usr/bin/gfortran  gfortran  /usr/bin/gfortran-8 \
+                         --slave   /usr/bin/gcov      gcov      /usr/bin/gcov-8
 
-# AMD profiler should be in /opt/CodeXL_2.6-302
-# Add to path in .bash_profile with 
-# export PATH=/opt/CodeXL_2.6-302:${PATH}
-# run with ./CodeXL or CodeXL once it is in your path
+sudo update-alternatives --install /usr/bin/gcc       gcc       /usr/bin/gcc-10 70 \
+                         --slave   /usr/bin/g++       g++       /usr/bin/g++-10 \
+                         --slave   /usr/bin/gfortran  gfortran  /usr/bin/gfortran-10 \
+                         --slave   /usr/bin/gcov      gcov      /usr/bin/gcov-10
 
-sudo apt install cmake imagemagick libmagickwand-dev -y
-sudo apt-get install libglu1-mesa-dev freeglut3-dev mesa-common-dev -y
+# Nvidia GPU software for computation
+sudo wget -q https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-repo-ubuntu1804_10.2.89-1_amd64.deb
+sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
+sudo RUN dpkg -i cuda-repo-ubuntu1804_10.2.89-1_amd64.deb
 
-# If Software updater prompts, install updated software --> takes some time
+sudo apt-get -qq update && \
+sudo apt-get -qq install -y cuda-toolkit-10-2 cuda-tools-10-2 cuda-compiler-10-2 \
+         cuda-libraries-10-2 cuda-libraries-dev-10-2 libnvidia-compute-450 && \
+sudo apt-get clean && \
+sudo rm -rf /var/lib/apt/lists/*
 
-sudo usermod -aG vboxsf chapter13
+# If Software updater prompts, install updated software --> wait ....
+
+PATH=/usr/local/cuda-10.2/bin:/usr/local/cuda-10.2/NsightCompute-2019.1${PATH:+:${PATH}}
+LD_LIBRARY_PATH=/usr/local/cuda-10.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+
+git clone --recursive https://github.com/essentialsofparallelcomputing/Chapter13.git
+
+cd Chapter13; #make
