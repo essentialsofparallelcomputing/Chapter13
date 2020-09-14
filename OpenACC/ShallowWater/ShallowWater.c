@@ -36,11 +36,12 @@ int main(int argc, char *argv[])
   double   totaltime;   //variables to calculate time taken for the program to run
   struct   timespec starttime;
   double   TotalMass, origTM;    //variables for checking conservation of mass
+#ifdef HAVE_GRAPHICS
   int graphics_type = GRAPHICS_NONE;
   char *graphics_type_string = getenv("GRAPHICS_TYPE");
+  if (graphics_type_string == NULL) graphics_type_string = "NONE";
   printf("Setting graphics type to %s\n",graphics_type_string);
   if (strcmp(graphics_type_string, "DATA") == 0)      graphics_type = GRAPHICS_DATA;
-#ifdef HAVE_MAGICKWAND
      if (strcmp(graphics_type_string, "BMP")  == 0) graphics_type = GRAPHICS_BMP;
      if (strcmp(graphics_type_string, "GIF")  == 0) graphics_type = GRAPHICS_GIF;
      if (strcmp(graphics_type_string, "JPEG") == 0) graphics_type = GRAPHICS_JPEG;

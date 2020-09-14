@@ -45,10 +45,6 @@ if (ENABLE_GRAPHICS)
    target_link_libraries(ShallowWater graphics ${FREEGLUT_LIBRARIES})
 endif (ENABLE_GRAPHICS)
 
-if (ImageMagick_MagickWand_FOUND)
-   add_definitions(-DHAVE_MAGICKWAND)
-endif (ImageMagick_MagickWand_FOUND)
-
 # Adds build target of ShallowWater_par1 with source code files
 if (OpenACC_C_FOUND)
    add_executable(ShallowWater_par1 ShallowWater_par1.c memory.c timer.c)
@@ -58,28 +54,28 @@ if (OpenACC_C_FOUND)
 endif (OpenACC_C_FOUND)
 
 # Adds build target of ShallowWater_par2 with source code files
-if (OpenACC_C_FOUND)
+if (OpenACC_C_FOUND AND NOT ${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
    add_executable(ShallowWater_par2 ShallowWater_par2.c memory.c timer.c)
    set_source_files_properties(ShallowWater_par2.c PROPERTIES COMPILE_FLAGS "${OpenACC_C_FLAGS} ${VECTOR_C_FLAGS}")
    set_target_properties(ShallowWater_par2 PROPERTIES LINK_FLAGS "${OpenACC_C_FLAGS}")
    target_link_libraries(ShallowWater_par2 -lm)
-endif (OpenACC_C_FOUND)
+endif (OpenACC_C_FOUND AND NOT ${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
 
 # Adds build target of ShallowWater_par3 with source code files
-if (OpenACC_C_FOUND)
+if (OpenACC_C_FOUND AND NOT ${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
    add_executable(ShallowWater_par3 ShallowWater_par3.c memory.c timer.c)
    set_source_files_properties(ShallowWater_par3.c PROPERTIES COMPILE_FLAGS "${OpenACC_C_FLAGS} ${VECTOR_C_FLAGS}")
    set_target_properties(ShallowWater_par3 PROPERTIES LINK_FLAGS "${OpenACC_C_FLAGS}")
    target_link_libraries(ShallowWater_par3 -lm)
-endif (OpenACC_C_FOUND)
+endif (OpenACC_C_FOUND AND NOT ${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
 
 # Adds build target of ShallowWater_par4 with source code files
-if (OpenACC_C_FOUND)
+if (OpenACC_C_FOUND AND NOT ${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
    add_executable(ShallowWater_par4 ShallowWater_par4.c memory.c timer.c)
    set_source_files_properties(ShallowWater_par4.c PROPERTIES COMPILE_FLAGS "${OpenACC_C_FLAGS} ${VECTOR_C_FLAGS}")
    set_target_properties(ShallowWater_par4 PROPERTIES LINK_FLAGS "${OpenACC_C_FLAGS}")
    target_link_libraries(ShallowWater_par4 -lm)
-endif (OpenACC_C_FOUND)
+endif (OpenACC_C_FOUND AND NOT ${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
 
 # Cleanup
 add_custom_target(distclean COMMAND rm -rf CMakeCache.txt CMakeFiles
