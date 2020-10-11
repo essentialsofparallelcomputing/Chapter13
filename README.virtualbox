@@ -69,4 +69,13 @@ export MANPATH=$MANPATH:$NVCOMPILERS/$NVARCH/20.9/compilers/man
 export PATH=$NVCOMPILERS/$NVARCH/20.9/compilers/bin:$PATH
 export CC=pgcc
 
-#cd Chapter13; make
+Put these in your dotfiles:
+
+echo "export NVARCH=`uname -s`_`uname -m`"
+echo "export NVCOMPILERS=/opt/nvidia/hpc_sdk"
+echo "export MANPATH=$MANPATH:$NVCOMPILERS/$NVARCH/20.9/compilers/man"
+echo "export PATH=$NVCOMPILERS/$NVARCH/20.9/compilers/bin:$PATH"
+echo "export CC=pgcc"
+
+
+cd Chapter13; make
