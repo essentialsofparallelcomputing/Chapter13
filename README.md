@@ -32,4 +32,8 @@ See License.txt for licensing information.
       gprof -l -pg ./ShallowWater
 
 # Virtual Box
-  
+   Directory OpenACC/ShallowWater
+   Follow README.autovirtualbox
+   ./autovirtualbox
+   Follow README.virtualbox
+   sh -v README.virtualbox
