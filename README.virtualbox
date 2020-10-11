@@ -57,9 +57,9 @@ sudo update-alternatives --install /usr/bin/gcc       gcc       /usr/bin/gcc-10 
                          --slave   /usr/bin/gcov      gcov      /usr/bin/gcov-10
 
 # Nvidia GPU software for computation
-sudo wget https://developer.download.nvidia.com/hpc-sdk/20.9/nvhpc-20-9_20.9_amd64.deb \ 
-  https://developer.download.nvidia.com/hpc-sdk/20.9/nvhpc-2020_20.9_amd64.deb
-sudo apt-get install ./nvhpc-20-9_20.9_amd64.deb
+sudo wget https://developer.download.nvidia.com/hpc-sdk/20.9/nvhpc-20-9_20.9_amd64.deb
+sudo wget https://developer.download.nvidia.com/hpc-sdk/20.9/nvhpc-2020_20.9_amd64.deb
+sudo apt-get install nvhpc-20-9 nvhpc-2020
 
 # If Software updater prompts, install updated software --> wait ....
 

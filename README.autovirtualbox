@@ -63,6 +63,14 @@
 
 # select dots at bottom left and terminal
 
+# Add user to sudo list if needed
+# su
+# visudo
+# add %vboxsf ALL=(ALL) ALL
+# exit
+
+# may need to reboot to clear package install lock
+
 # sudo apt-get update
 # sudo apt-get install -y build-essential dkms git
 # Now go up to devices and insert virtualbox-guest-additions-iso
@@ -76,3 +84,5 @@
 # Copy on Mac is command-C and paste in Ubuntu is shift-ctrl-v
 
 # Reboot to get cut and paste and screen size fixed
+
+# Use the view pulldown on the top menu bar. Follow the virtual screen option at the bottom and select a screen resolution
