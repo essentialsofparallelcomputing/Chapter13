@@ -69,7 +69,7 @@
 # add %vboxsf ALL=(ALL) ALL
 # exit
 
-# may need to reboot to clear package install lock
+# may need to wait for updates or reboot to clear package install lock
 
 # sudo apt-get update
 # sudo apt-get install -y build-essential dkms git

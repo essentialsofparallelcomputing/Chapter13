@@ -62,6 +62,8 @@
 #include "config.h"
 #endif
 
+static int magick_on = 0;
+
 #ifdef HAVE_MAGICKWAND
 #include <MagickWand/MagickWand.h>
 
@@ -104,8 +106,10 @@ enum graphics_file_type graphics_type=GRAPHICS_DATA; // type of graphics output
 
 //static int mode = MOVE;
 
+static int width;
 static float graphics_xmin=0.0, graphics_xmax=0.0, graphics_ymin=0.0, graphics_ymax=0.0;
 
+static int graphics_outline   = 0;
 static int graphics_view_mode = 0;
 static int graphics_mysize    = 0;
 

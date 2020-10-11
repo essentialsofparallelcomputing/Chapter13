@@ -103,6 +103,10 @@ struct ColorTable {
 };
 
 static int autoscale = 0;
+static double display_circle_radius=-1.0;
+static int current_frame = 0;
+static double sim_time;
+static int sim_cycle;
 
 #ifdef HAVE_OPENGL
 static struct ColorTable Rainbow[NCOLORS];
@@ -117,6 +121,7 @@ static int real_t, xstart, ystart, xend, yend;
 enum mode_choice {EYE, MOVE, DRAW};
 static int mode = MOVE;
 
+static int width;
 static float display_xmin=0.0, display_xmax=0.0, display_ymin=0.0, display_ymax=0.0;
 
 #ifdef HAVE_OPENGL
@@ -125,8 +130,12 @@ static GLfloat xrot = 0.0, yrot = 0.0, xloc = 0.0, zloc = 0.0;
 static double xrot = 0.0, yrot = 0.0, xloc = 0.0, zloc = 0.0;
 #endif
 
+static int display_outline;
 static int display_view_mode = 0;
 static int display_mysize    = 0;
+
+enum spatial_data_type {SPATIAL_DOUBLE, SPATIAL_FLOAT};
+static int spatial_type = SPATIAL_FLOAT;
 
 static double *x_double=NULL, *y_double=NULL, *dx_double=NULL, *dy_double=NULL;
 static float *x_float=NULL, *y_float=NULL, *dx_float=NULL, *dy_float=NULL;
