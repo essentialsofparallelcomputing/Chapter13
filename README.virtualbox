@@ -65,7 +65,8 @@ sudo apt-get install nvhpc-20-9 nvhpc-2020
 
 export NVARCH=`uname -s`_`uname -m`
 export NVCOMPILERS=/opt/nvidia/hpc_sdk
-export MANPATH=$MANPATH:$NVCOMPILERS/$NVARCH/20.7/compilers/man
-export PATH=$NVCOMPILERS/$NVARCH/20.7/compilers/bin:$PATH
+export MANPATH=$MANPATH:$NVCOMPILERS/$NVARCH/20.9/compilers/man
+export PATH=$NVCOMPILERS/$NVARCH/20.9/compilers/bin:$PATH
+export CC=pgcc
 
-cd Chapter13; #make
+#cd Chapter13; make
