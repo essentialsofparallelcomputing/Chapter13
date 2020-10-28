@@ -64,10 +64,18 @@ RUN usermod -a -G video chapter13
 WORKDIR /home/chapter13
 RUN chown -R chapter13:chapter13 /home/chapter13
 USER chapter13
+
+ENV LANG='en_US.UTF-8'
+ENV DISPLAY=:0
+ENV NVIDIA_VISIBLE_DEVICES=all
+ENV NVIDIA_DRIVER_CAPABILITIES=display,graphics,utility,compute
+#ENV NVIDIA_DRIVER_CAPABILITIES all
+#
 ENV NVARCH=Linux_x86_64
 ENV NVCOMPILERS=/opt/nvidia/hpc_sdk
 ENV MANPATH=$MANPATH:$NVCOMPILERS/$NVARCH/20.9/compilers/man
 ENV PATH=$NVCOMPILERS/$NVARCH/20.9/compilers/bin:$PATH
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${NVCOMPILERS}/${NVARCH}/20.9/cuda/11.0/extras/CUPTI/lib64
 ENV CC=pgcc
 
 RUN git clone --recursive https://github.com/essentialsofparallelcomputing/Chapter13.git
