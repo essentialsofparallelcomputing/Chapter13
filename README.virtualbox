@@ -20,7 +20,7 @@
 # Reboot to get cut and paste and screen size fixed
 
 # Add user to sudo list if needed
-# su
+# sudo -i
 # visudo
 # add %vboxsf ALL=(ALL) ALL
 # exit
