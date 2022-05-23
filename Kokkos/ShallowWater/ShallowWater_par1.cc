@@ -117,7 +117,6 @@ int main(int argc, char *argv[])
           double xspeed = (fabs(U(j,i))+wavespeed)/deltaX;
           double yspeed = (fabs(V(j,i))+wavespeed)/deltaY;
           double my_deltaT = sigma/(xspeed+yspeed);
-          //local_deltaT = my_deltaT < local_deltaT ? my_deltaT : local_deltaT;
           if (my_deltaT < deltaT) deltaT = my_deltaT;
         }
       }

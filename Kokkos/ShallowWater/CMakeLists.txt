@@ -13,7 +13,7 @@ endif (ENABLE_GRAPHICS)
 
 # Adds build target of ShallowWater with source code files
 add_executable(ShallowWater ShallowWater.cc memory.c timer.c)
-target_link_libraries(ShallowWater Kokkos::kokkos -lm)
+target_link_libraries(ShallowWater -lm)
 if (ENABLE_GRAPHICS)
    set_source_files_properties(ShallowWater.cc PROPERTIES COMPILE_FLAGS "-DHAVE_GRAPHICS=1")
    set_source_files_properties(ShallowWater.cc PROPERTIES INCLUDE_DIRECTORIES graphics)
