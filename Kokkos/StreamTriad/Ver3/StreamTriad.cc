@@ -8,7 +8,7 @@ int main(int argc, char *argv[]){
    int nsize=80000000; int ntimes=16;
    double scalar = 3.0, time_sum = 0.0;
 
-   Kokkos::initialize(argc, argv);
+   Kokkos::initialize(argc, argv); {
 
    // initializing data and arrays
    Kokkos::View<double *> a( "a", nsize);
@@ -33,6 +33,5 @@ int main(int argc, char *argv[]){
 
    printf("Average runtime is %lf msecs\n", time_sum/ntimes);
 
-   Kokkos::finalize();
-   exit(0);
+   } Kokkos::finalize();
 }
