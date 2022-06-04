@@ -26,5 +26,5 @@ int main(int argc, char *argv[]){
       c[1]=c[2];
    }
 
-   printf("Average runtime is %lf msecs\n", time_sum/NTIMES);
+   printf("Average runtime is %lf msecs\n", time_sum/NTIMES*1000.0);
 }

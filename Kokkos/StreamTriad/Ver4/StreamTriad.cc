@@ -24,11 +24,9 @@ int main(int argc, char *argv[]){
          c[i] = a[i] + scalar*b[i];
       });
       time_sum += timer.seconds();
-      // to keep the compiler from optimizing out the loop
-      c[1]=c[2];
    }
 
-   printf("Average runtime is %lf msecs\n", time_sum/ntimes);
+   printf("Average runtime is %lf msecs\n", time_sum/ntimes*1000.0);
 
    } Kokkos::finalize();
 }
