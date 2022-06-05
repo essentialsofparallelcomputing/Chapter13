@@ -4,13 +4,12 @@
 
 int main(int argc, char *argv[]){
    struct timespec tstart;
-   // initializing data and arrays
    int nsize=80000000; int ntimes=16;
    double scalar = 3.0, time_sum = 0.0;
 
    Kokkos::initialize(argc, argv); {
 
-   // initializing data and arrays
+   // initializing arrays
    Kokkos::View<double *> a( "a", nsize);
    Kokkos::View<double *> b( "b", nsize);
    Kokkos::View<double *> c( "c", nsize);

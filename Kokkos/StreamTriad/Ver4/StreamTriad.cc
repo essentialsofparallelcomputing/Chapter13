@@ -7,7 +7,7 @@ int main(int argc, char *argv[]){
 
    Kokkos::initialize(argc, argv); {
 
-   // initializing data and arrays
+   // initializing arrays
    Kokkos::View<double *> a( "a", nsize);
    Kokkos::View<double *> b( "b", nsize);
    Kokkos::View<double *> c( "c", nsize);
