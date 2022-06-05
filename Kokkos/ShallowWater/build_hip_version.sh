@@ -4,12 +4,7 @@ export OMP_PLACES=threads
 export OMP_PROC_BIND=true
 
 mkdir hip_build; cd hip_build
-cmake -DKokkos_ENABLE_HIP=ON \
-      -DKokkos_ARCH_ZEN=ON \
-      -DKokkos_ARCH_VEGA906=ON \
-      -DCMAKE_CXX_COMPILER=hipcc \
-      ..
-
+cmake -DKokkos_ENABLE_HIP=ON -DCMAKE_CXX_COMPILER=hipcc ..
 make -j 8
 
 ./ShallowWater
