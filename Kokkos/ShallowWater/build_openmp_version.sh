@@ -8,8 +8,10 @@ cmake -DKokkos_ENABLE_OPENMP=ON \
       ..
 make -j 8
 
-./ShallowWater
-./ShallowWater_par1
-./ShallowWater_par2
-./ShallowWater_par3
-./ShallowWater_par4
+for exec in ShallowWater ShallowWater_par?
+do
+   echo ""
+   echo "Running $exec version"
+   ./$exec
+   echo "==========================="
+done

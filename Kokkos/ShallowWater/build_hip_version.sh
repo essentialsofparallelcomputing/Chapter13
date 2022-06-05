@@ -7,8 +7,10 @@ mkdir hip_build; cd hip_build
 cmake -DKokkos_ENABLE_HIP=ON -DCMAKE_CXX_COMPILER=hipcc ..
 make -j 8
 
-./ShallowWater
-./ShallowWater_par1
-./ShallowWater_par2
-./ShallowWater_par3
-./ShallowWater_par4
+for exec in ShallowWater ShallowWater_par?
+do
+   echo ""
+   echo "Running $exec version"
+   ./$exec
+   echo "==========================="
+done
